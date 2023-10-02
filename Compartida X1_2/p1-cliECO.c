@@ -45,9 +45,12 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    char aux[30];
-    obtenirIpSock(socket_c, aux, 30);
-    printf("Prova: %s\n", aux);
+    char IPloc[20];
+    char IPrem[20];
+    int portLoc, portRem;
+
+    TCP_TrobaAdrSockLoc(socket_c, IPloc, &portLoc);
+    printf("IP servidor: %s:%d\n", IPloc, portLoc);
 
     // LLEGIR INPUT USUARI PER A CONNECTAR-SE:
     
@@ -55,11 +58,10 @@ int main(int argc, char *argv[])
     scanf("%s", ip);
     printf("Introdueix el port al que et vols connectar:");
     scanf("%d", &port);
-    printf("IP: %s, port: %d\n", ip, port);
-
     printf("%d\n", TCP_DemanaConnexio(socket_c, ip, port));
-    obtenirIpPeer(socket_c, aux, 30);
-    printf("Prova 2: %s\n", aux);
+
+    TCP_TrobaAdrSockRem(socket_c, IPrem, &portRem);
+    printf("IP servidor: %s:%d\n", IPrem, portRem);
     
 }
 

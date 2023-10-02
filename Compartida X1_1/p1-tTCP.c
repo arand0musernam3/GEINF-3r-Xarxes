@@ -35,7 +35,7 @@
 
 /* int FuncioInterna(arg1, arg2...);                                      */
 
-#include <cstdio>
+#include <stdio.h>
 
 struct sockaddr_in generarStruct(const char *IPloc, int portTCPloc) {
     struct sockaddr_in address;
@@ -163,7 +163,7 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
     getsockname(Sck, (struct sockaddr *)&localaddr, &addrlon);
 
 
-    if (newSck = accept(Sck, (struct sockaddr*) &localaddr, &addrlon) == -1) {
+    if ((newSck = accept(Sck, (struct sockaddr*) &localaddr, &addrlon) == -1)) {
         close(Sck);
         return -1;
     }
@@ -185,7 +185,11 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 /* -1 si hi ha error.                                                     */
 int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 {
-	
+	int aux;
+    aux = write(Sck, SeqBytes, LongSeqBytes);
+    if (aux < 0)
+        return -1;
+    return aux;
 }
 
 /* Rep a través del socket TCP “connectat” d’identificador “Sck” una      */
@@ -202,7 +206,12 @@ int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 /* -1 si hi ha error.                                                     */
 int TCP_Rep(int Sck, char *SeqBytes, int LongSeqBytes)
 {
-	
+    //TODO: Comprovar si la connexió està tancada i retornar 0.
+    int aux;
+    aux = read(Sck, SeqBytes, LongSeqBytes);
+    if (aux < 0)
+        return -1;
+    return aux;
 }
 
 /* S’allibera (s’esborra) el socket TCP d’identificador “Sck”; si “Sck”   */
@@ -213,7 +222,7 @@ int TCP_Rep(int Sck, char *SeqBytes, int LongSeqBytes)
 /* -1 si hi ha error.                                                     */
 int TCP_TancaSock(int Sck)
 {
-	
+	return close(Sck);
 }
 
 /* Donat el socket TCP d’identificador “Sck”, troba l’adreça d’aquest     */
@@ -228,7 +237,17 @@ int TCP_TancaSock(int Sck)
 /* -1 si hi ha error.                                                     */
 int TCP_TrobaAdrSockLoc(int Sck, char *IPloc, int *portTCPloc)
 {
-	
+    unsigned int addrlon;
+    struct sockaddr_in localaddr;
+
+    if (getsockname(Sck, (struct sockaddr *)&localaddr, &addrlon) < 0)
+        return -1;
+
+    strcpy(IPloc, inet_ntoa(localaddr.sin_addr));
+
+    *portTCPloc = ntohs(localaddr.sin_port);
+
+    return 0;
 }
 
 /* Donat el socket TCP “connectat” d’identificador “Sck”, troba l’adreça  */
@@ -243,7 +262,17 @@ int TCP_TrobaAdrSockLoc(int Sck, char *IPloc, int *portTCPloc)
 /* -1 si hi ha error.                                                     */
 int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
 {
-	
+    unsigned int addrlon;
+    struct sockaddr_in localaddr;
+
+    if (getpeername(Sck, (struct sockaddr *)&localaddr, &addrlon) < 0)
+        return -1;
+
+    strcpy(IPrem, inet_ntoa(localaddr.sin_addr));
+
+    *portTCPrem = ntohs(localaddr.sin_port);
+
+    return 0;
 }
 
 /* Obté un missatge de text de l'S.O. que descriu l'error produït en      */
@@ -257,7 +286,7 @@ char* T_ObteTextRes(int *CodiRes)
 {
  *CodiRes= errno;
  return strerror(errno);
-} 
+}
 
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */
 

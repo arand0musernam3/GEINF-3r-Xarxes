@@ -42,8 +42,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    obtenirIpSock(socket_s, aux, 30);
-
     printf("Socket inicialitzat a %s\n", aux);
 
     socket_s = TCP_AcceptaConnexio(socket_s, remIP, &remPort);
