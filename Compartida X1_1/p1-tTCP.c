@@ -64,10 +64,7 @@ struct sockaddr_in generarStruct(const char *IPloc, int portTCPloc) {
 int TCP_CreaSockClient(const char *IPloc, int portTCPloc)
 {
     int scon;
-    struct sockaddr_in address;
-    address.sin_family = AF_INET;
-    address.sin_port=htons(portTCPloc);
-    address.sin_addr.s_addr= inet_addr(IPloc);
+    struct sockaddr_in address = generarStruct(IPloc, portTCPloc);
 
 	if ((scon=socket(AF_INET,SOCK_STREAM,0))==-1)
         return -1;
@@ -110,7 +107,6 @@ int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
         close(scon);
         return -1;
     }
-
     
     return scon;
 }
@@ -163,7 +159,7 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
     getsockname(Sck, (struct sockaddr *)&localaddr, &addrlon);
 
 
-    if ((newSck = accept(Sck, (struct sockaddr*) &localaddr, &addrlon) == -1)) {
+    if ((newSck = accept(Sck, (struct sockaddr*) &localaddr, &addrlon)) == -1) {
         close(Sck);
         return -1;
     }

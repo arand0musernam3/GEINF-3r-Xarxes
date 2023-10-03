@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
 {
     /* Declaració de variables, p.e., int n;                                 */
     int socket_s;
+    int socket_con;
     int port;
     char remIP[16];
     int remPort;
@@ -37,15 +38,23 @@ int main(int argc, char *argv[])
 
     /* Expressions, estructures de control, crides a funcions, etc.          */
     printf("Inicialitzant el servidor...\n");
-    if (socket_s = TCP_CreaSockServidor("0.0.0.0", TCP_PORT) == -1) {
-        printf("Error en crear el socket del servidor\n");
+    if ((socket_s = TCP_CreaSockServidor("0.0.0.0", TCP_PORT)) == -1) {
+        printf("Error en crear el socket del servidor: %d\n", socket_s);
         return -1;
     }
 
+    obtenirIpSock(socket_s, aux, 30);
+
     printf("Socket inicialitzat a %s\n", aux);
 
-    socket_s = TCP_AcceptaConnexio(socket_s, remIP, &remPort);
+    socket_con = TCP_AcceptaConnexio(socket_s, remIP, &remPort);
 
+    char rebut[512];
+    if (TCP_Rep(socket_con, rebut, 512) < 0) {
+        printf("Error en la lectura de TCP_Rep\n");
+    }
+
+    printf("%s", rebut);
 }
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */

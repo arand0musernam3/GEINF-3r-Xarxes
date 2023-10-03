@@ -22,6 +22,8 @@
 
 #define LLARGADA_BUFFER_IP 16
 
+const char STOP_SEQUENCE[] = "STOP\0";
+
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
@@ -38,31 +40,43 @@ int main(int argc, char *argv[])
     /* Expressions, estructures de control, crides a funcions, etc.          */
 
     // OBERTURA SOCKET PORT ALEATORI
-    
-    if (socket_c = TCP_CreaSockClient("0.0.0.0", 0) == -1)
+
+    if ((socket_c = TCP_CreaSockClient("0.0.0.0", 0)) == -1)
     {
         printf("Error a TCP_CreaSockClient");
         return -1;
     }
 
-    char IPloc[20];
-    char IPrem[20];
-    int portLoc, portRem;
+    char aux[30];
 
-    TCP_TrobaAdrSockLoc(socket_c, IPloc, &portLoc);
-    printf("IP servidor: %s:%d\n", IPloc, portLoc);
+    obtenirIpSock(socket_c, aux, 30);
+
+    printf("IP servidor: %s\n", aux);
 
     // LLEGIR INPUT USUARI PER A CONNECTAR-SE:
-    
+
     printf("Introdueix la direcció IP a la que et vols connectar:");
     scanf("%s", ip);
     printf("Introdueix el port al que et vols connectar:");
     scanf("%d", &port);
-    printf("%d\n", TCP_DemanaConnexio(socket_c, ip, port));
 
-    TCP_TrobaAdrSockRem(socket_c, IPrem, &portRem);
-    printf("IP servidor: %s:%d\n", IPrem, portRem);
-    
+    TCP_DemanaConnexio(socket_c, ip, port);
+
+    obtenirIpPeer(socket_c, aux, 30);
+    printf("IP servidor: %s\n", aux);
+
+    printf("Entra \"STOP\" per a parar la transmissio de missatges\n");
+
+    char msg[512];
+    int readBytesMsg;
+
+    while(true) {
+        if (strcmp())
+        msg[readBytesMsg-1] = '\0';
+        readBytesMsg = read(0, msg, 512);
+        printf("Enviats %d bytes\n", TCP_Envia(socket_c, msg, readBytesMsg));
+    }
+
 }
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
