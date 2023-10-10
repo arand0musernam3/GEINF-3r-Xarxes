@@ -70,12 +70,16 @@ int main(int argc, char *argv[])
     char msg[512];
     int readBytesMsg;
 
-    while(true) {
-        if (strcmp())
-        msg[readBytesMsg-1] = '\0';
+    for(;;) {
         readBytesMsg = read(0, msg, 512);
+        msg[readBytesMsg-1] = '\0';
+        if (!strcmp(msg, STOP_SEQUENCE)) {
+            break;
+        }
         printf("Enviats %d bytes\n", TCP_Envia(socket_c, msg, readBytesMsg));
     }
+
+    TCP_TancaSock(socket_c);
 
 }
 

@@ -46,15 +46,31 @@ int main(int argc, char *argv[])
     obtenirIpSock(socket_s, aux, 30);
 
     printf("Socket inicialitzat a %s\n", aux);
-
-    socket_con = TCP_AcceptaConnexio(socket_s, remIP, &remPort);
-
     char rebut[512];
-    if (TCP_Rep(socket_con, rebut, 512) < 0) {
-        printf("Error en la lectura de TCP_Rep\n");
-    }
+    int RepRet;
+    printf("Sck Listen %d\n", socket_s);
 
-    printf("%s", rebut);
+    while(1) {
+        printf("Sck Listen %d\n", socket_s);
+
+        socket_con = TCP_AcceptaConnexio(socket_s, remIP, &remPort);
+        if (socket_con < 0) {
+            printf("Error en TCP_AcceptaConnexio\n");
+        }
+        printf("%d\n", socket_con);
+        while(1) {
+            if ((RepRet = TCP_Rep(socket_con, rebut, 512)) < 0) {
+//                break;printf("Error en la lectura de TCP_Rep\n");
+            }
+            else if (RepRet == 0) {
+                printf("SOCKET_CON %d\n", socket_con);
+                TCP_TancaSock(socket_con);
+                break;
+            }
+            else
+                printf("Rebut: %s (%d bytes)\n", rebut, RepRet);
+        }
+    }
 }
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
