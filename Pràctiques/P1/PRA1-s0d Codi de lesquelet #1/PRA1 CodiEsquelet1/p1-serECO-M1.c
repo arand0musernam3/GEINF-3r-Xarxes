@@ -57,10 +57,15 @@ int main(int argc, char *argv[])
         }
         else {
             printf("Rebuda nova connexió\n");
+            obtenirIpSock(socket_con, aux, 30);
+            printf(" - SCON local: %s\n", aux);
+            obtenirIpPeer(socket_con, aux, 30);
+            printf(" - SCON remot: %s\n", aux);
+
             obtenirIpSock(socket_s, aux, 30);
-            printf(" - Socket local: %s\n", aux);
+            printf(" - SESC local: %s\n", aux);
             obtenirIpPeer(socket_s, aux, 30);
-            printf(" - Socket remot: %s\n", aux);
+            printf(" - SESC remot: %s\n", aux);
         }
 
         while(1) {

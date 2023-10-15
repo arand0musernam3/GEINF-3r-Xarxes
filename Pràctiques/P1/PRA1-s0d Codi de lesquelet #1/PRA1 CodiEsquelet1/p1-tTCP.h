@@ -3,7 +3,7 @@
 /* P1 - L'aplicació ECO amb sockets TCP/IP                                */
 /* Fitxer capçalera de tTCP.c                                             */
 /*                                                                        */
-/* Autors:                                                                */
+/* Autors: Jordi Badia i Aniol Juanola                                    */
 /* Data:                                                                  */
 /*                                                                        */
 /**************************************************************************/
@@ -29,3 +29,5 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem);
 char* T_ObteTextRes(int *CodiRes);
 
 /* int TCP_FuncioExterna(arg1, arg2...);                                  */
+void obtenirIpSock(int sock, char *str, int len);
+void obtenirIpPeer(int sock, char *str, int len);
