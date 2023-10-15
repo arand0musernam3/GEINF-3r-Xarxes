@@ -32,55 +32,60 @@ const char STOP_SEQUENCE[] = "STOP\0";
 
 int main(int argc, char *argv[])
 {
-    /* Declaració de variables, p.e., int n;                                 */
+    //variables a utilitzar
     char ip[LLARGADA_BUFFER_IP];
     int port;
     int socket_c;
-
-    /* Expressions, estructures de control, crides a funcions, etc.          */
-
-    // OBERTURA SOCKET PORT ALEATORI
-
-    if ((socket_c = TCP_CreaSockClient("0.0.0.0", 0)) == -1)
-    {
-        printf("Error a TCP_CreaSockClient");
-        return -1;
-    }
-
     char aux[30];
-
-    obtenirIpSock(socket_c, aux, 30);
-
-    printf("IP servidor: %s\n", aux);
-
-    // LLEGIR INPUT USUARI PER A CONNECTAR-SE:
-
-    printf("Introdueix la direcció IP a la que et vols connectar:");
-    scanf("%s", ip);
-    printf("Introdueix el port al que et vols connectar:");
-    scanf("%d", &port);
-
-    TCP_DemanaConnexio(socket_c, ip, port);
-
-    obtenirIpPeer(socket_c, aux, 30);
-    printf("IP servidor: %s\n", aux);
-
-    printf("Entra \"STOP\" per a parar la transmissio de missatges\n");
-
     char msg[512];
     int readBytesMsg;
 
-    for(;;) {
-        readBytesMsg = read(0, msg, 512);
-        msg[readBytesMsg-1] = '\0';
-        if (!strcmp(msg, STOP_SEQUENCE)) {
-            break;
+    char opt[5];
+    do {
+        if ((socket_c = TCP_CreaSockClient("0.0.0.0", 0)) == -1)
+        {
+            printf("Error a TCP_CreaSockClient");
+            return -1;
         }
-        printf("Enviats %d bytes\n", TCP_Envia(socket_c, msg, readBytesMsg));
-    }
 
-    TCP_TancaSock(socket_c);
+        obtenirIpSock(socket_c, aux, 30);
 
+        printf("IP servidor: %s\n", aux);
+
+        // LLEGIR INPUT USUARI PER A CONNECTAR-SE:
+
+        printf("Introdueix la direcció IP a la que et vols connectar:");
+        scanf("%s", ip);
+        printf("Introdueix el port al que et vols connectar:");
+        scanf("%d", &port);
+
+        TCP_DemanaConnexio(socket_c, ip, port);
+
+        obtenirIpPeer(socket_c, aux, 30);
+        printf("IP servidor: %s\n", aux);
+
+        printf("Entra \"STOP\" per a parar la transmissio de missatges\n");
+
+
+        for(;;) {
+            readBytesMsg = read(0, msg, 512);
+            msg[readBytesMsg-1] = '\0';
+            if (!strcmp(msg, STOP_SEQUENCE)) {
+                break;
+            }
+            printf("Enviats %d bytes\n", TCP_Envia(socket_c, msg, readBytesMsg));
+            readBytesMsg = TCP_Rep(socket_c, msg, 512);
+            printf("ECO: %s\n\n", msg);
+        }
+
+        TCP_TancaSock(socket_c);
+
+        //ara toca demanar si es vol establir una altra connexió.
+        printf("Vols establir una altra connexió? [y/n]");
+        scanf("%s", opt);
+    } while (opt[0] == 'y' || opt[0] == 'Y');
+
+    return 0;
 }
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */

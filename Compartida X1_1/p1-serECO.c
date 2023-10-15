@@ -18,7 +18,6 @@
 /* Definició de constants, p.e.,                                          */
 
 /* #define XYZ       1500                                                 */
-#define TCP_PORT    3333
 
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
@@ -31,14 +30,16 @@ int main(int argc, char *argv[])
     /* Declaració de variables, p.e., int n;                                 */
     int socket_s;
     int socket_con;
-    int port;
+    int port_s;
     char remIP[16];
     int remPort;
     char aux[30];
 
     /* Expressions, estructures de control, crides a funcions, etc.          */
+    printf("Entra el port d'escolta del servidor: ");
+    scanf("%d", &port_s);
     printf("Inicialitzant el servidor...\n");
-    if ((socket_s = TCP_CreaSockServidor("0.0.0.0", TCP_PORT)) == -1) {
+    if ((socket_s = TCP_CreaSockServidor("0.0.0.0", port_s)) == -1) {
         printf("Error en crear el socket del servidor: %d\n", socket_s);
         return -1;
     }
@@ -48,27 +49,37 @@ int main(int argc, char *argv[])
     printf("Socket inicialitzat a %s\n", aux);
     char rebut[512];
     int RepRet;
-    printf("Sck Listen %d\n", socket_s);
 
     while(1) {
-        printf("Sck Listen %d\n", socket_s);
-
         socket_con = TCP_AcceptaConnexio(socket_s, remIP, &remPort);
         if (socket_con < 0) {
             printf("Error en TCP_AcceptaConnexio\n");
         }
-        printf("%d\n", socket_con);
+        else {
+            printf("Rebuda nova connexió\n");
+            obtenirIpSock(socket_s, aux, 30);
+            printf(" - Socket local: %s\n", aux);
+            obtenirIpPeer(socket_s, aux, 30);
+            printf(" - Socket remot: %s\n", aux);
+        }
+
         while(1) {
             if ((RepRet = TCP_Rep(socket_con, rebut, 512)) < 0) {
-//                break;printf("Error en la lectura de TCP_Rep\n");
+                printf("%d", socket_con);
+                printf("Error en la lectura de TCP_Rep\n");
+                return -1;
             }
             else if (RepRet == 0) {
-                printf("SOCKET_CON %d\n", socket_con);
+                printf("Connexio tancada amb el client (%s)\n\n", aux); //podem aprofitar valor anterior
                 TCP_TancaSock(socket_con);
                 break;
             }
-            else
+            else {
                 printf("Rebut: %s (%d bytes)\n", rebut, RepRet);
+                if (TCP_Envia(socket_con, rebut, RepRet) < 0) {
+                    printf("Error en l'enviament de l'ECO de %s", rebut);
+                }
+            }
         }
     }
 }
