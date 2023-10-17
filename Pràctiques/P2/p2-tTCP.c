@@ -1,12 +1,12 @@
 /**************************************************************************/
 /*                                                                        */
-/* P1 - L'aplicació ECO amb sockets TCP/IP                                */
+/* P2 - L'aplicació UEB amb sockets TCP/IP - Part I                       */
 /* Fitxer tTCP.c que "implementa" la capa de transport TCP, o més         */
 /* ben dit, que encapsula les funcions de la interfície de sockets        */
 /* TCP, en unes altres funcions més simples i entenedores: la "nova"      */
 /* interfície de sockets TCP.                                             */
 /*                                                                        */
-/* Autors: Jordi Badia i Aniol Juanola                                    */
+/* Autors:                                                                */
 /* Data:                                                                  */
 /*                                                                        */
 /**************************************************************************/
@@ -16,6 +16,7 @@
 /*   un #include del propi fitxer capçalera)                              */
 
 #include <string.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -23,17 +24,6 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <errno.h>
-
-/* Definició de constants, p.e.,                                          */
-
-/* #define XYZ       1500                                                 */
-#define TCP_QUEUE_MAX_SIZE 10
-
-/* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
-/* (les  definicions d'aquestes funcions es troben més avall) per així    */
-/* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
-
-/* int FuncioInterna(arg1, arg2...);                                      */
 
 #include <stdio.h>
 
@@ -58,6 +48,18 @@ char* T_ObteTextRes(int *CodiRes)
     return strerror(errno);
 }
 
+
+
+/* Definició de constants, p.e.,                                          */
+
+/* #define XYZ       1500                                                 */
+
+/* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
+/* (les  definicions d'aquestes funcions es troben més avall) per així    */
+/* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
+
+/* int FuncioInterna(arg1, arg2...);                                      */
+
 /* Definició de funcions EXTERNES, és a dir, d'aquelles que es cridaran   */
 /* des d'altres fitxers, p.e., int TCP_FuncioExterna(arg1, arg2...) { }   */
 /* En termes de capes de l'aplicació, aquest conjunt de funcions externes */
@@ -65,7 +67,7 @@ char* T_ObteTextRes(int *CodiRes)
 /* interfície de sockets TCP).                                            */
 
 /* Crea un socket TCP “client” a l’@IP “IPloc” i #port TCP “portTCPloc”   */
-/* (si “IPloc” és “0.0.0.0” i/o “portTCPloc” és 0 es fa/farà una          */ 
+/* (si “IPloc” és “0.0.0.0” i/o “portTCPloc” és 0 es fa/farà una          */
 /* assignació implícita de l’@IP i/o del #port TCP, respectivament).      */
 /*                                                                        */
 /* "IPloc" és un "string" de C (vector de chars imprimibles acabat en     */
@@ -79,9 +81,9 @@ int TCP_CreaSockClient(const char *IPloc, int portTCPloc)
     int scon;
     struct sockaddr_in address = generarStruct(IPloc, portTCPloc);
 
-	if ((scon=socket(AF_INET,SOCK_STREAM,0))==-1)
+    if ((scon=socket(AF_INET,SOCK_STREAM,0))==-1)
         return -1;
-    
+
     if ((bind(scon, (struct sockaddr*) &address, sizeof(address))) < 0) {
         close(scon);
         return -1;
@@ -103,17 +105,17 @@ int TCP_CreaSockClient(const char *IPloc, int portTCPloc)
 /* -1 si hi ha error.                                                     */
 int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
 {
-	int scon, aux;
+    int scon, aux;
     struct sockaddr_in address = generarStruct(IPloc, portTCPloc);
-    
-	if((scon=socket(AF_INET,SOCK_STREAM,0)) < 0) {
+
+    if((scon=socket(AF_INET,SOCK_STREAM,0)) < 0) {
         printf("%s\n", T_ObteTextRes(&scon));
         close(scon);
         return -1;
     }
 
     aux = bind(scon, (struct sockaddr*) &address, sizeof(address));
-    
+
     if (aux < 0) {
         printf("%s\n", T_ObteTextRes(&aux));
         close(scon);
@@ -127,7 +129,7 @@ int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
         close(scon);
         return -1;
     }
-    
+
     return scon;
 }
 
@@ -153,7 +155,7 @@ int TCP_DemanaConnexio(int Sck, const char *IPrem, int portTCPrem)
         close(Sck);
         return -1;
     }
-	return 0;
+    return 0;
 }
 
 /* El socket TCP “servidor” d’identificador “Sck” accepta fer una         */
@@ -176,7 +178,7 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 {
     int newSck;
 
-	unsigned int addrlon;
+    unsigned int addrlon;
     struct sockaddr_in localaddr;
     getsockname(Sck, (struct sockaddr *)&localaddr, &addrlon);
 
@@ -188,7 +190,7 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 
     strcpy(IPrem, inet_ntoa(localaddr.sin_addr));
     *portTCPrem = ntohs(localaddr.sin_port);
-	return newSck;
+    return newSck;
 }
 
 /* Envia a través del socket TCP “connectat” d’identificador “Sck” la     */
@@ -203,7 +205,7 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 /* -1 si hi ha error.                                                     */
 int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 {
-	int aux;
+    int aux;
     aux = write(Sck, SeqBytes, LongSeqBytes);
     if (aux < 0)
         return -1;
@@ -239,7 +241,7 @@ int TCP_Rep(int Sck, char *SeqBytes, int LongSeqBytes)
 /* -1 si hi ha error.                                                     */
 int TCP_TancaSock(int Sck)
 {
-	return close(Sck);
+    return close(Sck);
 }
 
 /* Donat el socket TCP d’identificador “Sck”, troba l’adreça d’aquest     */
@@ -290,26 +292,4 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
     *portTCPrem = ntohs(localaddr.sin_port);
 
     return 0;
-}
-
-/* Si ho creieu convenient, feu altres funcions EXTERNES                  */
-
-void obtenirIpSock(int sock, char *str, int len) {
-    unsigned int addrlon;
-    struct sockaddr_in localaddr;
-
-    getsockname(sock, (struct sockaddr *)&localaddr, &addrlon);
-
-    snprintf(str, len, "%s:%d", inet_ntoa(localaddr.sin_addr), ntohs(localaddr.sin_port));
-    str[len - 1] = '\0';
-}
-
-void obtenirIpPeer(int sock, char *str, int len) {
-    unsigned int addrlon;
-    struct sockaddr_in localaddr;
-
-    getpeername(sock, (struct sockaddr *)&localaddr, &addrlon);
-
-    snprintf(str, len, "%s:%d", inet_ntoa(localaddr.sin_addr), ntohs(localaddr.sin_port));
-    str[len - 1] = '\0';
 }
