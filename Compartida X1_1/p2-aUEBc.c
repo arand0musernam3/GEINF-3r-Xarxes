@@ -16,10 +16,9 @@
 
 
 #include "p2-tTCP.h"
-
-#define COR "COR\0"
-#define ERR "ERR\0"
-#define OBT "OBT\0"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MAX_LENGTH 10006
 
@@ -53,10 +52,15 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
 /* -1 si hi ha un error a la interfície de sockets.                       */
 int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *IPcli, int *portTCPcli, char *TextRes)
 {
+    //TODO: IPcli, portTCPcli, TextRes
     int sck = TCP_CreaSockClient("0.0.0.0", 0);
-    int scon = TCP_DemanaConnexio(sck, IPser, portTCPser);
+    if (TCP_DemanaConnexio(sck, IPser, portTCPser) == -1) {
+        TextRes = "Connexió no acceptada\n";
+        return -1;
+    }
+    //TCP_TrobaAdrSockRem(sck, IPcli, portTCPcli); PETA QUAN DESCOMENTES SEGFAULT mirar TODO
 
-    return scon;
+    return sck;
 }
 
 /* Obté el fitxer de nom "NomFitx" del S UEB a través de la connexió TCP  */
@@ -80,7 +84,7 @@ int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *IPcli, int *por
 int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, char *TextRes)
 {
     int aux;
-    aux = ConstiEnvMis(SckCon, OBT, NomFitx, strlen(NomFitx));
+    aux = ConstiEnvMis(SckCon, "OBT", NomFitx, strlen(NomFitx));
     if (aux < 0)
         return aux;
 
@@ -89,7 +93,7 @@ int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, 
     if (aux < 0)
         return aux;
 
-    if (!strcmp(tipus, ERR)) {
+    if (!strcmp(tipus, "ERR")) {
         strncpy(TextRes, Fitx, *LongFitx > 200 ? 200 : *LongFitx);
         return 1;
     }
@@ -155,7 +159,7 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
     if (long1 > 9999 || long1 <= 0)
         return -2;
 
-	if (!strcmp(tipus, OBT) || !strcmp(tipus, COR) || !strcmp(tipus, ERR)) {
+	if (!strcmp(tipus, "OBT") || !strcmp(tipus, "COR") || !strcmp(tipus, "ERR"))  {
         memcpy(send_buf, tipus, 3);
         sprintf(send_buf + 3, "%.4d", long1);
         memcpy(send_buf + 7, info1, long1);
@@ -189,7 +193,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
     int aux = TCP_Rep(SckCon, receive_buf, MAX_LENGTH);
 	if (aux < 0)
         return -1;
-    if (strncmp(receive_buf, OBT, 3) && strncmp(receive_buf, COR, 3) && strncmp(receive_buf, ERR, 3))
+    if (strncmp(receive_buf, "OBT", 3) && strncmp(receive_buf, "COR", 3) && strncmp(receive_buf, "ERR", 3))
         return -2;
     //ara sabem que el tipus és correcte
     memcpy(tipus, receive_buf, 3);

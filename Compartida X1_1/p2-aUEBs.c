@@ -15,6 +15,14 @@
 /*   un #include del propi fitxer capçalera)                              */
 
 #include "p2-tTCP.h"
+#include <stdlib.h>
+#include <sys/types.h> //Specified in man 2 open
+#include <sys/stat.h>
+#include <errno.h> //Allows use of error numbers
+#include <fcntl.h> //Specified in man 2 open
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 /* Definició de constants, p.e.,                                          */
 
@@ -60,6 +68,7 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
         TextRes = strerror(aux);
         return -1;
     }
+    *SckEsc = aux;
     TextRes = "Tot ha anat bé.\0";
     return 0;
 }
@@ -90,7 +99,7 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
         TextRes = strerror(aux);
         return -1;
     }
-    return 0;
+    return aux;
 
 }
 
@@ -117,6 +126,7 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
 int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *TextRes)
 {
     char tipus[4];
+    TextRes = "holaa\n";
     int longNomFitx, descFitx, aux;
     aux = RepiDesconstMis(SckCon, tipus, NomFitx, &longNomFitx);
     if (aux < 0) {
@@ -135,7 +145,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     }
     char fitxer[10000];
     int bytes_fitxer = read(descFitx, fitxer, 10000);
-    ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer, bytes_fitxer);
+    ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer);
     return 0;
 }
 
@@ -232,6 +242,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
         return -1;
     if (strncmp(receive_buf, OBT, 3) && strncmp(receive_buf, COR, 3) && strncmp(receive_buf, ERR, 3))
         return -2;
+
     //ara sabem que el tipus és correcte
     memcpy(tipus, receive_buf, 3);
     tipus[3] = '\0';

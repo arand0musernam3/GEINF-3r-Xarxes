@@ -14,7 +14,14 @@
 /* Inclusió de llibreries, p.e. #include <stdio.h> o #include "meu.h"     */
 
 #include "p2-aUEBc.h"
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 /* Definició de constants, p.e.,                                          */
 
 /* #define XYZ       1500                                                 */
@@ -29,70 +36,60 @@ const char STOP_SEQUENCE[] = "STOP\0";
 
 /* int FuncioInterna(arg1, arg2...);                                      */
 
-int main(int argc,char *argv[])
-{
- // Declaració de variables, p.e., int n;  
+int main(int argc, char *argv[]) {
+    // Declaració de variables, p.e., int n;
     int socket_c;
     char text_res[200];
 
- /* Expressions, estructures de control, crides a funcions, etc.          */
+    /* Expressions, estructures de control, crides a funcions, etc.          */
+    char peticio[8];
+    char ip_ser[LLARGADA_BUFFER_IP];
+    int port_ser;
+    char *ip_cli;
+    int port_cli;
+    char nom_fitxer[10000];
 
-    char opt[5];
     do {
-        char peticio[8];
-        char ip_ser[LLARGADA_BUFFER_IP]; 
-        int port_ser;
-        char nom_fitxer[10000];
-        printf("Petició: ");
-        scanf("%s", peticio);
         printf("IP servidor: ");
         scanf("%s", ip_ser);
         printf("Port servidor: ");
         scanf("%d", &port_ser);
         port_ser = port_ser == 0 ? 3000 : port_ser;
+    } while ((socket_c = UEBc_DemanaConnexio(ip_ser, port_ser, ip_cli, &port_cli, text_res)) == -1);
+
+    char opt[5];
+    do {
+        printf("Petició: ");
+        scanf("%s", peticio);
         printf("Nom del fitxer: ");
         scanf("%s", nom_fitxer);
 
-        char *ip_cli;
-        int port_cli;
-        if ((socket_c = UEBc_DemanaConnexio(ip_ser, port_ser, ip_cli, port_cli, text_res))) {
-            printf("%s", text_res);
-        } else {
-            if (!strecmp(peticio,"obtenir")) {
-                char fitxer[9999];
-                int long_fitxer;
+        if (!strcmp(peticio, "obtenir")) {
+            char fitxer[9999];
+            int long_fitxer;
 
-                if (UEBc_ObteFitxer(socket_c, nom_fitxer, fitxer, &long_fitxer, text_res) != 0) {
-                    printf(text_res);
-                }
-                else {
-                    printf("Servida petició: %s %s de %s:%d a %s:%d\n", tipus, nom_fitxer, ip_cli, port_cli, ip_ser, port_ser);
+            if (UEBc_ObteFitxer(socket_c, nom_fitxer, fitxer, &long_fitxer, text_res) != 0) {
+                printf(text_res);
+            } else {
+                printf("Servida petició: %s %s de %s:%d a %s:%d\n", peticio, nom_fitxer, ip_cli, port_cli, ip_ser,
+                       port_ser);
 
-                    printf("%s", fitxer);
+                printf("%s", fitxer);
 
-                    int fd = open(nom_fitxer, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-                    write(fd,fitxer,long_fitxer);
-                }
-
-                sleep(3);
+                int fd = open(nom_fitxer, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                write(fd, fitxer, long_fitxer);
             }
+
         }
         printf("Vols realitzar una altra petició? [y/n]");
         scanf("%s", opt);
     } while (opt[0] == 'y' || opt[0] == 'Y');
-    if (UEBc_TancaConnexio(socket_c,text_res) == -1) {
-        printf("%s",text_res);
+
+    sleep(3);
+
+    if (UEBc_TancaConnexio(socket_c, text_res) == -1) {
+        printf("%s", text_res);
     }
+
     return 0;
 }
-
-/* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
-/* servir només en aquest mateix fitxer. Les seves declaracions es troben */
-/* a l'inici d'aquest fitxer.                                             */
-
-/* Descripció de la funció, dels arguments, valors de retorn, etc.        */
-/*int FuncioInterna(arg1, arg2...)
-{
-	
-} */
-

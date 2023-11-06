@@ -14,6 +14,8 @@
 
 #include "p2-aUEBs.h"
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 int main(int argc,char *argv[])
 {
@@ -35,33 +37,38 @@ int main(int argc,char *argv[])
     FILE *fp;
     char linia[50];
 
-    if ((fp = fopen("serUEB.cfg","r")) > 0 && fgets(linia,sizeof(linia),fp) == NULL) {
-        printf("No s'ha pogut trobar el port a obrir")
+    fp = fopen("p2-serUEB.cfg","r");
+    if (fgets(linia,sizeof(linia),fp) == NULL) {
+        printf("No s'ha pogut trobar el port a obrir");
         return -1;
     }
 
-    port_s = atoi(linia);
+    port_s = atoi(linia+9);
 
-    if ((socket_s = UEBs_IniciaServ(socket_con, port_s, text_res)) == -1) {
+    printf("Port d'escolta: %d\n", port_s);
+
+    if (UEBs_IniciaServ(&socket_s, port_s, text_res) == -1) {
         printf("%s",text_res);
         return -1;
     }
 
-    printf("Servidor inicialitzat\n");
+    printf("Servidor inicialitzat correctament. Socket: %d\n", socket_s);
 
     while (1) {
-        if ((socket_con = UEBs_AcceptaConnexio(soccket_s, locIP, locPort, remIP, remPort, text_res)) < 0) {
+        if ((socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res)) < 0) {
             printf("%s", text_res);
         }
+        printf("Nova connexió acceptada. Socket_con: %d\n", socket_con);
 
         while (1) {
-            char tipus[4], char nom_fitxer[10000];
+            char tipus[4], nom_fitxer[10000];
             int res = UEBs_ServeixPeticio(socket_con, tipus, nom_fitxer, text_res);
-            printf("Servida petició: %s %s de %s:%d a %s:%d\n", tipus, nom_fitxer, remIP, remPort, locIP, remIP);
             if (res == 0) {
-                printf("Fitxer servir\n");
+                printf("Servida petició: %s %s de %s:%d a %s:%d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort);
+                printf("Fitxer servit\n");
             }
             else if (res == 1) {
+                printf("Servida petició: %s %s de %s:%d a %s:%d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort);
                 printf("Fitxer inexistent\n");
             }
             else {

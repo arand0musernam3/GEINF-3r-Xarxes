@@ -27,6 +27,8 @@
 
 #include <stdio.h>
 
+#define TCP_QUEUE_MAX_SIZE 10
+
 struct sockaddr_in generarStruct(const char *IPloc, int portTCPloc) {
     struct sockaddr_in address;
     address.sin_family = AF_INET;
