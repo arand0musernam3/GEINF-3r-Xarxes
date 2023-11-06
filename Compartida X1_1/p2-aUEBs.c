@@ -86,7 +86,10 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
         TextRes = strerror(aux);
         return -1;
     }
-    TCP_TrobaAdrSockLoc(aux, IPser, portTCPser);
+    if (TCP_TrobaAdrSockLoc(aux, IPser, portTCPser) < 0) {
+        TextRes = strerror(aux);
+        return -1;
+    }
     return 0;
 
 }
@@ -130,6 +133,10 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
         ConstiEnvMis(SckCon, ERR, "No s'ha trobat el fitxer.\0", 26);
         return 1;
     }
+    char fitxer[10000];
+    int bytes_fitxer = read(descFitx, fitxer, 10000);
+    ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer, bytes_fitxer);
+    return 0;
 }
 
 /* Tanca la connexió TCP d'identificador "SckCon".                        */
@@ -143,7 +150,13 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
 /*  -1 si hi ha un error a la interfície de sockets.                      */
 int UEBs_TancaConnexio(int SckCon, char *TextRes)
 {
-	
+	int aux = TCP_TancaSock(SckCon);
+    if (aux == 0)
+        TextRes = "Tot ha anat bé.\0";
+    else {
+        TextRes = strerror(aux);
+    }
+    return aux;
 }
 
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */
