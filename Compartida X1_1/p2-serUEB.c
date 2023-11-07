@@ -17,6 +17,25 @@
 #include <string.h>
 #include <stdlib.h>
 
+int read_config(char* path, int* port) {
+
+    FILE *fp;
+    char linia[50];
+
+    fp = fopen("p2-serUEB.cfg","r");
+    if (fgets(linia,sizeof(linia),fp) == NULL) {
+        printf("No s'ha pogut trobar el port a obrir");
+        return -1;
+    }
+    *port = atoi(linia+9);
+
+    if (fgets(linia,sizeof(linia),fp) == NULL) {
+        printf("No s'ha pogut trobar l'arrel.");
+        return -1;
+    }
+    strcpy(path, linia+7);
+}
+
 int main(int argc,char *argv[])
 {
     //sempre hi haurà dos bucles infinits, el primer de serveix a dins, fins que es retorni -3 que llavors es tancarà la connexió. Fer un sleep al final tal i com diu l'enunciat.
@@ -33,17 +52,11 @@ int main(int argc,char *argv[])
     char remIP[16];
     int remPort;
 
+    char path[300];
+
     /* Expressions, estructures de control, crides a funcions, etc.          */
-    FILE *fp;
-    char linia[50];
 
-    fp = fopen("p2-serUEB.cfg","r");
-    if (fgets(linia,sizeof(linia),fp) == NULL) {
-        printf("No s'ha pogut trobar el port a obrir");
-        return -1;
-    }
-
-    port_s = atoi(linia+9);
+    read_config(path, &port_s);
 
     printf("Port d'escolta: %d\n", port_s);
 
@@ -57,12 +70,13 @@ int main(int argc,char *argv[])
     while (1) {
         if ((socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res)) < 0) {
             printf("%s", text_res);
+            continue;
         }
         printf("Nova connexió acceptada. Socket_con: %d\n", socket_con);
 
         while (1) {
             char tipus[4], nom_fitxer[10000];
-            int res = UEBs_ServeixPeticio(socket_con, tipus, nom_fitxer, text_res);
+            int res = UEBs_ServeixPeticio(socket_con, tipus, nom_fitxer, text_res, path);
             if (res == 0) {
                 printf("Servida petició: %s %s de %s:%d a %s:%d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort);
                 printf("Fitxer servit\n");
@@ -73,6 +87,11 @@ int main(int argc,char *argv[])
             }
             else {
                 printf("%s", text_res);
+                if (res == -3){
+                    UEBs_TancaConnexio(socket_con, text_res);
+                    printf("%s",text_res);
+                    break;
+                }
             }
         }
     }

@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         scanf("%s", opt);
     } while (opt[0] == 'y' || opt[0] == 'Y');
 
-    sleep(3);
+    sleep(5);
 
     if (UEBc_TancaConnexio(socket_c, text_res) == -1) {
         printf("%s", text_res);

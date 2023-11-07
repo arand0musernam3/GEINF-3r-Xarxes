@@ -191,6 +191,8 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 {
     int aux = TCP_Rep(SckCon, receive_buf, MAX_LENGTH);
+    if (aux == 0)
+        return -3;
 	if (aux < 0)
         return -1;
     if (strncmp(receive_buf, "OBT", 3) && strncmp(receive_buf, "COR", 3) && strncmp(receive_buf, "ERR", 3))
@@ -206,7 +208,5 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
         return -2;
 
     memcpy(info1, receive_buf+7, *long1);
-    //TODO: FER QUE RETORNI -3 QUAN TOCA
-
     return 0;
 }

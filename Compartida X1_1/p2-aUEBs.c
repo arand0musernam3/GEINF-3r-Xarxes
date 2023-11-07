@@ -123,10 +123,9 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
 /* -3 si l'altra part tanca la connexió;                                  */
 /* -4 si hi ha problemes amb el fitxer de la petició (p.e., nomfitxer no  */
 /*  comença per /, fitxer no es pot llegir, fitxer massa gran, etc.).     */
-int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *TextRes)
+int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *TextRes, const char* path)
 {
     char tipus[4];
-    TextRes = "holaa\n";
     int longNomFitx, descFitx, aux;
     aux = RepiDesconstMis(SckCon, tipus, NomFitx, &longNomFitx);
     if (aux < 0) {
@@ -137,6 +136,10 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     if (NomFitx[0] != '/')
         return -4;
 
+    //TODO UTILITZAR PATH CONCATENAR DAVANT NOMFITXER LLEGIT
+
+    //TODO MIRAR QUE ELS CODIS SIGUIN INTERCANVIABLES??? NO SÉ
+
     descFitx = open(NomFitx+1, O_RDONLY);
     if (descFitx < 0) {
         //no existeix el fitxer
@@ -145,6 +148,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     }
     char fitxer[10000];
     int bytes_fitxer = read(descFitx, fitxer, 10000);
+    printf("%s\n",fitxer);
     ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer);
     return 0;
 }
@@ -238,6 +242,8 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 {
     int aux = TCP_Rep(SckCon, receive_buf, MAX_LENGTH);
+    if (aux == 0)
+        return -3;
     if (aux < 0)
         return -1;
     if (strncmp(receive_buf, OBT, 3) && strncmp(receive_buf, COR, 3) && strncmp(receive_buf, ERR, 3))
@@ -254,7 +260,8 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
         return -2;
 
     memcpy(info1, receive_buf+7, *long1);
-    //TODO: FER QUE RETORNI -3 QUAN TOCA
+
+    info1[*long1] = '\0';
 
     return 0;
 }
