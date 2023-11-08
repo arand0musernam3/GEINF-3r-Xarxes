@@ -127,9 +127,8 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
 /*  comença per /, fitxer no es pot llegir, fitxer massa gran, etc.).     */
 int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *TextRes, const char* path)
 {
-    char tipus[4];
     int longNomFitx, descFitx, aux;
-    aux = RepiDesconstMis(SckCon, tipus, NomFitx, &longNomFitx);
+    aux = RepiDesconstMis(SckCon, TipusPeticio, NomFitx, &longNomFitx);
     if (aux < 0) {
         switch (aux) {
             case -1:

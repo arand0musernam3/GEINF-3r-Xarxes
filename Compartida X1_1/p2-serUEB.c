@@ -37,6 +37,13 @@ int read_config(char* path, int* port) {
     strcpy(path, linia+7);
 }
 
+int fd;
+
+void escriure(const char* str) {
+    write(fd, text_res, strlen(text_res));
+    printf("%s", text_res);
+}
+
 int main(int argc,char *argv[])
 {
     //sempre hi haurà dos bucles infinits, el primer de serveix a dins, fins que es retorni -3 que llavors es tancarà la connexió. Fer un sleep al final tal i com diu l'enunciat.
@@ -47,6 +54,7 @@ int main(int argc,char *argv[])
     int socket_con;
     int port_s;
     char text_res[200];
+    char buffer[1000];
 
     char locIP[16];
     int locPort;
@@ -56,27 +64,21 @@ int main(int argc,char *argv[])
     char path[300];
 
     // Fitxer log
-    int fd = open("serUEB.log", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    fd = open("serUEB.log", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     
     read_config(path, &port_s);
 
-    char buffer[1000];
-    int l = sprintf(buffer, "Port d'escolta: %d\n", port_s);
-    write(fd, buffer, l);
-    l = sprintf(buffer, "Arrel de src: %s\n", path);
-    write(fd, buffer, l);
-
-    printf("Port d'escolta: %d\n", port_s);
+    sprintf(buffer, "Port d'escolta: %d\n\0", port_s);
+    escriure(buffer);
+    sprintf(buffer, "Arrel de src: %s\n\0", path);
+    escriure(buffer);
 
     if (UEBs_IniciaServ(&socket_s, port_s, text_res) == -1) {
-        write(fd, text_res, strlen(text_res));
-        printf("%s",text_res);
+        escriure(text_res);
         return -1;
     }
 
-
-    write(fd, text_res, strlen(text_res));
-    printf("%s", text_res);
+    escriure(text_res);
 
     while (1) {
         if ((socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res)) < 0) {
@@ -85,26 +87,22 @@ int main(int argc,char *argv[])
             continue;
         }
 
-        write(fd, text_res, strlen(text_res));
-        printf("%s", text_res);
+        escriure(text_res);
 
         while (1) {
             char tipus[4], nom_fitxer[10000];
             int res = UEBs_ServeixPeticio(socket_con, tipus, nom_fitxer, text_res, path);
 
             if (res == 0 || res == 1) {
-                l = sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
-                write(fd, buffer, l);
-                printf("Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
+                sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n\0", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
+                escriure(buffer);
             }
 
-            write(fd, text_res, strlen(text_res));
-            printf("%s", text_res); //TODO FER MACRO PER AIXO
+            escriure(text_res);
 
             if (res == -3) {
                 UEBs_TancaConnexio(socket_con, text_res);
-                write(fd, text_res, strlen(text_res));
-                printf("%s", text_res);
+                escriure(text_res);
                 break;
             }
         }
