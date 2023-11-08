@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
             double temps;
             start = clock();
             if (UEBc_ObteFitxer(socket_c, nom_fitxer, fitxer, &long_fitxer, text_res) != 0) {
-                printf(text_res);
+                printf("%s", text_res);
             } else {
                 end = clock();
                 printf("Servida petició: %s %s de %s:%d a %s:%d\n", peticio, nom_fitxer, ip_cli, port_cli, ip_ser,

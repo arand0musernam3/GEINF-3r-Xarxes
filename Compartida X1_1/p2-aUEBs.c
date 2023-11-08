@@ -70,7 +70,7 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
         return -1;
     }
     *SckEsc = aux;
-    sprintf(TextRes, "El servidor ha estat iniciat correctament (Socket d'escolta: %d)\n\0", SckEsc);
+    sprintf(TextRes, "El servidor ha estat iniciat correctament (Socket d'escolta: %d)\n\0", *SckEsc);
     return 0;
 }
 
@@ -100,6 +100,7 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
         TextRes = strerror(aux);
         return -1;
     }
+    sprintf(TextRes, "Nova connexió acceptada. Socket: %d\n\0", aux);
     return aux;
 
 }
@@ -149,7 +150,10 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
         return -4;
     }
 
-    NomFitx = strcat(NomFitx, path);
+    char auxStr[512] = "";
+    strcat(auxStr, path);
+    strcat(auxStr, NomFitx);
+    strcpy(NomFitx, auxStr);
 
     descFitx = open(NomFitx, O_RDONLY);
     if (descFitx < 0) {
@@ -181,9 +185,9 @@ int UEBs_TancaConnexio(int SckCon, char *TextRes)
 {
 	int aux = TCP_TancaSock(SckCon);
     if (aux == 0)
-        TextRes = "La connexió s'ha tencat correctament\n\0";
+        TextRes = "La connexió s'ha tancat correctament\n\0";
     else {
-        TextRes = "No s'ha pogut tencar la connexió correctament.\n\0";
+        TextRes = "No s'ha pogut tancar la connexió correctament.\n\0";
     }
     return aux;
 }

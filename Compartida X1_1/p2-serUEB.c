@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 int read_config(char* path, int* port) {
 
@@ -56,7 +57,6 @@ int main(int argc,char *argv[])
 
     // Fitxer log
     int fd = open("serUEB.log", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    write(fd, fitxer, long_fitxer);
     
     read_config(path, &port_s);
 
@@ -96,19 +96,16 @@ int main(int argc,char *argv[])
                 l = sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
                 write(fd, buffer, l);
                 printf("Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
-
-                if (res == 0) {
-                    write(fd, text_res, strlen(text_res));
-                    printf("%s", text_res);
-                }
-                else {
-                    write (fd, text_res, strlen(text_res));
-                    printf("%s", text_res);
-                }
             }
-            else {
+
+            write(fd, text_res, strlen(text_res));
+            printf("%s", text_res); //TODO FER MACRO PER AIXO
+
+            if (res == -3) {
+                UEBs_TancaConnexio(socket_con, text_res);
                 write(fd, text_res, strlen(text_res));
                 printf("%s", text_res);
+                break;
             }
         }
     }
