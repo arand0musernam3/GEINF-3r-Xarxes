@@ -192,6 +192,7 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 
     strcpy(IPrem, inet_ntoa(localaddr.sin_addr));
     *portTCPrem = ntohs(localaddr.sin_port);
+
     return newSck;
 }
 

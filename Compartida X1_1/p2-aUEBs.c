@@ -66,7 +66,7 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 {
     int aux = TCP_CreaSockServidor("0.0.0.0", portTCPser);
     if (aux <= 0) {
-        TextRes = "Error en inicialitzar el servidor\n\0";
+        strcpy(TextRes, "Error en inicialitzar el servidor\n\0");
         return -1;
     }
     *SckEsc = aux;
@@ -93,11 +93,11 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
 {
     int aux = TCP_AcceptaConnexio(SckEsc, IPcli, portTCPcli);
     if (aux <= 0) {
-        TextRes = strerror(aux);
+        strcpy(TextRes, strerror(aux));
         return -1;
     }
     if (TCP_TrobaAdrSockLoc(aux, IPser, portTCPser) < 0) {
-        TextRes = strerror(aux);
+        strcpy(TextRes, strerror(aux));
         return -1;
     }
     sprintf(TextRes, "Nova connexió acceptada. Socket: %d\n\0", aux);
@@ -132,20 +132,21 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     if (aux < 0) {
         switch (aux) {
             case -1:
-                TextRes = "Hi ha hagut un error a la interfície de sockets\n\0";
+                strcpy(TextRes, "Hi ha hagut un error a la interfície de sockets\n\0");
                 break;
             case -2:
-                TextRes = "El protocol és incorrecte\n\0";
+                strcpy(TextRes, "El protocol és incorrecte\n\0");
                 break;
             case -3:
-                TextRes = "El client ha tancat la connexió\n\0";
+                strcpy(TextRes, "El client ha tancat la connexió\n\0");
                 break;
         }
         return aux;
     }
 
     if (NomFitx[0] != '/') {
-        TextRes = "El protocol és correcte, però hi ha hagut problemes amb el fitxer de la petició\n\0";
+        strcpy(TextRes, "El protocol és correcte, però hi ha hagut problemes amb el fitxer de la petició\n\0");
+        ConstiEnvMis(SckCon, ERR, "El format del fitxer és incorrecte. T'has oblidat la /?\n\0", 57);
         return -4;
     }
 
@@ -157,16 +158,15 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     descFitx = open(NomFitx, O_RDONLY);
     if (descFitx < 0) {
         ConstiEnvMis(SckCon, ERR, "No s'ha trobat el fitxer.\0", 26);
-        TextRes = "El fitxer no s'ha trobat\n\0";
+        strcpy(TextRes, "El fitxer no s'ha trobat\n\0");
         return 1;
     }
     char fitxer[10000];
     int bytes_fitxer = read(descFitx, fitxer, 10000);
-
-    printf("%s\n",fitxer);
+    
     ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer);
 
-    TextRes = "El fitxer ha estat enviat\n\0";
+    strcpy(TextRes, "El fitxer ha estat enviat\n\0");
 
     return 0;
 }
@@ -184,9 +184,9 @@ int UEBs_TancaConnexio(int SckCon, char *TextRes)
 {
 	int aux = TCP_TancaSock(SckCon);
     if (aux == 0)
-        TextRes = "La connexió s'ha tancat correctament\n\0";
+        strcpy(TextRes, "La connexió s'ha tancat correctament\n\0");
     else {
-        TextRes = "No s'ha pogut tancar la connexió correctament.\n\0";
+        strcpy(TextRes, "No s'ha pogut tancar la connexió correctament.\n\0");
     }
     return aux;
 }
@@ -240,7 +240,7 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
         }
         end = clock();
 
-        double te = (((double) (end - start)) / CLOCKS_PER_SEC) / 1000;
+        double te = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
         printf("Temps d'enviament: %f ms\n", te);
         printf("Velocitat efectiva: %f b/ms\n", long1 / te);
 

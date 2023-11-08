@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     char peticio[8];
     char ip_ser[LLARGADA_BUFFER_IP];
     int port_ser;
-    char *ip_cli;
+    char ip_cli[20];
     int port_cli;
     char nom_fitxer[10000];
 
@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
     } while ((socket_c = UEBc_DemanaConnexio(ip_ser, port_ser, ip_cli, &port_cli, text_res)) == -1);
 
     char opt[5];
+    int obtingutCorrectament;
     do {
         printf("Petició: ");
         scanf("%s", peticio);
@@ -70,9 +71,9 @@ int main(int argc, char *argv[]) {
             int long_fitxer;
 
             clock_t start, end;
-            double temps;
             start = clock();
-            if (UEBc_ObteFitxer(socket_c, nom_fitxer, fitxer, &long_fitxer, text_res) != 0) {
+            obtingutCorrectament = UEBc_ObteFitxer(socket_c, nom_fitxer, fitxer, &long_fitxer, text_res);
+            if (obtingutCorrectament != 0) {
                 printf("%s", text_res);
             } else {
                 end = clock();
@@ -81,16 +82,16 @@ int main(int argc, char *argv[]) {
 
                 printf("%s\n", fitxer);
 
-                printf("Temps de resposta: %f ms\n", (((double) (end - start)) / CLOCKS_PER_SEC) / 1000);
+                printf("Temps de resposta: %f ms\n", (((double) (end - start)) / CLOCKS_PER_SEC) * 1000);
 
-                int fd = open(nom_fitxer, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                int fd = open(nom_fitxer+1, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); //el +1 és per esquivar la / del principi NO TREURE
                 write(fd, fitxer, long_fitxer);
             }
 
         }
         printf("Vols realitzar una altra petició? [y/n]");
         scanf("%s", opt);
-    } while (opt[0] == 'y' || opt[0] == 'Y');
+    } while (opt[0] == 'y' || opt[0] == 'Y' || obtingutCorrectament != 0);
 
     sleep(5);
 

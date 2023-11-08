@@ -54,11 +54,11 @@ int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *IPcli, int *por
 {
     int sck = TCP_CreaSockClient("0.0.0.0", 0);
     if (TCP_DemanaConnexio(sck, IPser, portTCPser) == -1) {
-        TextRes = "Connexió no acceptada\n\0";
+        strcpy(TextRes, "Connexió no acceptada\n\0");
         return -1;
     }
-    TextRes = "Connexió acceptada\n\0";
-    //TCP_TrobaAdrSockRem(sck, IPcli, portTCPcli); PETA QUAN DESCOMENTES SEGFAULT mirar TODO
+    strcpy(TextRes, "Connexió acceptada\n\0");
+    TCP_TrobaAdrSockLoc(sck, IPcli, portTCPcli);
 
     return sck;
 }
@@ -115,9 +115,9 @@ int UEBc_TancaConnexio(int SckCon, char *TextRes)
 {
     int aux = TCP_TancaSock(SckCon);
     if (aux == 0)
-        TextRes = "Tot ha anat bé.\0";
+        strcpy(TextRes, "Tot ha anat bé.\0");
     else {
-        TextRes = strerror(aux);
+        strcpy(TextRes, strerror(aux));
     }
     return aux;
 }

@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 int read_config(char* path, int* port) {
 
@@ -94,14 +95,14 @@ int main(int argc,char *argv[])
 
             if (res == 0 || res == 1) {
                 sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n\0", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
-                //escriure(buffer);
+                escriure(buffer);
             }
 
-            //escriure(text_res);
+            escriure(text_res);
 
             if (res == -3) {
                 UEBs_TancaConnexio(socket_con, text_res);
-                //escriure(text_res);
+                escriure(text_res);
                 break;
             }
         }
