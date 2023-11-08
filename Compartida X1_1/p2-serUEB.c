@@ -40,8 +40,8 @@ int read_config(char* path, int* port) {
 int fd;
 
 void escriure(const char* str) {
-    write(fd, text_res, strlen(text_res));
-    printf("%s", text_res);
+    write(fd, str, strlen(str));
+    printf("%s", str);
 }
 
 int main(int argc,char *argv[])
@@ -82,8 +82,7 @@ int main(int argc,char *argv[])
 
     while (1) {
         if ((socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res)) < 0) {
-            write(fd, text_res, strlen(text_res));
-            printf("%s", text_res);
+            escriure(text_res);
             continue;
         }
 
@@ -95,14 +94,14 @@ int main(int argc,char *argv[])
 
             if (res == 0 || res == 1) {
                 sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n\0", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
-                escriure(buffer);
+                //escriure(buffer);
             }
 
-            escriure(text_res);
+            //escriure(text_res);
 
             if (res == -3) {
                 UEBs_TancaConnexio(socket_con, text_res);
-                escriure(text_res);
+                //escriure(text_res);
                 break;
             }
         }
