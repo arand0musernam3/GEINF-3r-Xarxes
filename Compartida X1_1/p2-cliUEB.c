@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 /* Definició de constants, p.e.,                                          */
 
 /* #define XYZ       1500                                                 */
@@ -68,13 +69,19 @@ int main(int argc, char *argv[]) {
             char fitxer[9999];
             int long_fitxer;
 
+            clock_t start, end;
+            double temps;
+            start = clock();
             if (UEBc_ObteFitxer(socket_c, nom_fitxer, fitxer, &long_fitxer, text_res) != 0) {
                 printf(text_res);
             } else {
+                end = clock();
                 printf("Servida petició: %s %s de %s:%d a %s:%d\n", peticio, nom_fitxer, ip_cli, port_cli, ip_ser,
                        port_ser);
 
-                printf("%s", fitxer);
+                printf("%s\n", fitxer);
+
+                printf("Temps de resposta: %f ms\n", (((double) (end - start)) / CLOCKS_PER_SEC) / 1000);
 
                 int fd = open(nom_fitxer, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 write(fd, fitxer, long_fitxer);
