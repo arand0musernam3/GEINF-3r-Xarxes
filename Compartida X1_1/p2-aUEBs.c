@@ -65,11 +65,11 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 {
     int aux = TCP_CreaSockServidor("0.0.0.0", portTCPser);
     if (aux <= 0) {
-        TextRes = strerror(aux);
+        TextRes = "Error en inicialitzar el servidor\n\0";
         return -1;
     }
     *SckEsc = aux;
-    TextRes = "Tot ha anat bé.\0";
+    sprintf(TextRes, "El servidor ha estat iniciat correctament (Socket d'escolta: %d)\n\0", SckEsc);
     return 0;
 }
 
@@ -129,27 +129,41 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     int longNomFitx, descFitx, aux;
     aux = RepiDesconstMis(SckCon, tipus, NomFitx, &longNomFitx);
     if (aux < 0) {
+        switch (aux) {
+            case -1:
+                TextRes = "Hi ha hagut un error a la interfície de sockets\n\0";
+                break;
+            case -2:
+                TextRes = "El protocol és incorrecte\n\0";
+                break;
+            case -3:
+                TextRes = "El client ha tancat la connexió\n\0";
+                break;
+        }
         return aux;
     }
 
-    //TODO ARREGLAR PEL -4
-    if (NomFitx[0] != '/')
+    if (NomFitx[0] != '/') {
+        TextRes = "El protocol és correcte, però hi ha hagut problemes amb el fitxer de la petició\n\0";
         return -4;
+    }
 
-    //TODO UTILITZAR PATH CONCATENAR DAVANT NOMFITXER LLEGIT
+    NomFitx = strcat(NomFitx, path);
 
-    //TODO MIRAR QUE ELS CODIS SIGUIN INTERCANVIABLES??? NO SÉ
-
-    descFitx = open(NomFitx+1, O_RDONLY);
+    descFitx = open(NomFitx, O_RDONLY);
     if (descFitx < 0) {
-        //no existeix el fitxer
         ConstiEnvMis(SckCon, ERR, "No s'ha trobat el fitxer.\0", 26);
+        TextRes = "El fitxer no s'ha trobat\n\0";
         return 1;
     }
     char fitxer[10000];
     int bytes_fitxer = read(descFitx, fitxer, 10000);
+
     printf("%s\n",fitxer);
     ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer);
+
+    TextRes = "El fitxer ha estat enviat\n\0";
+
     return 0;
 }
 
@@ -166,9 +180,9 @@ int UEBs_TancaConnexio(int SckCon, char *TextRes)
 {
 	int aux = TCP_TancaSock(SckCon);
     if (aux == 0)
-        TextRes = "Tot ha anat bé.\0";
+        TextRes = "La connexió s'ha tencat correctament\n\0";
     else {
-        TextRes = strerror(aux);
+        TextRes = "No s'ha pogut tencar la connexió correctament.\n\0";
     }
     return aux;
 }

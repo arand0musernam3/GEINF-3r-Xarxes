@@ -54,44 +54,61 @@ int main(int argc,char *argv[])
 
     char path[300];
 
-    /* Expressions, estructures de control, crides a funcions, etc.          */
-
+    // Fitxer log
+    int fd = open("serUEB.log", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    write(fd, fitxer, long_fitxer);
+    
     read_config(path, &port_s);
+
+    char buffer[1000];
+    int l = sprintf(buffer, "Port d'escolta: %d\n", port_s);
+    write(fd, buffer, l);
+    l = sprintf(buffer, "Arrel de src: %s\n", path);
+    write(fd, buffer, l);
 
     printf("Port d'escolta: %d\n", port_s);
 
     if (UEBs_IniciaServ(&socket_s, port_s, text_res) == -1) {
+        write(fd, text_res, strlen(text_res));
         printf("%s",text_res);
         return -1;
     }
 
-    printf("Servidor inicialitzat correctament. Socket: %d\n", socket_s);
+
+    write(fd, text_res, strlen(text_res));
+    printf("%s", text_res);
 
     while (1) {
         if ((socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res)) < 0) {
+            write(fd, text_res, strlen(text_res));
             printf("%s", text_res);
             continue;
         }
-        printf("Nova connexió acceptada. Socket_con: %d\n", socket_con);
+
+        write(fd, text_res, strlen(text_res));
+        printf("%s", text_res);
 
         while (1) {
             char tipus[4], nom_fitxer[10000];
             int res = UEBs_ServeixPeticio(socket_con, tipus, nom_fitxer, text_res, path);
-            if (res == 0) {
-                printf("Servida petició: %s %s de %s:%d a %s:%d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort);
-                printf("Fitxer servit\n");
-            }
-            else if (res == 1) {
-                printf("Servida petició: %s %s de %s:%d a %s:%d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort);
-                printf("Fitxer inexistent\n");
+
+            if (res == 0 || res == 1) {
+                l = sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
+                write(fd, buffer, l);
+                printf("Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
+
+                if (res == 0) {
+                    write(fd, text_res, strlen(text_res));
+                    printf("%s", text_res);
+                }
+                else {
+                    write (fd, text_res, strlen(text_res));
+                    printf("%s", text_res);
+                }
             }
             else {
+                write(fd, text_res, strlen(text_res));
                 printf("%s", text_res);
-                if (res == -3){
-                    UEBs_TancaConnexio(socket_con, text_res);
-                    printf("%s",text_res);
-                    break;
-                }
             }
         }
     }
