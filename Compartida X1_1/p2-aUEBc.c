@@ -52,12 +52,12 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
 /* -1 si hi ha un error a la interfície de sockets.                       */
 int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *IPcli, int *portTCPcli, char *TextRes)
 {
-    //TODO: IPcli, portTCPcli, TextRes
     int sck = TCP_CreaSockClient("0.0.0.0", 0);
     if (TCP_DemanaConnexio(sck, IPser, portTCPser) == -1) {
-        TextRes = "Connexió no acceptada\n";
+        TextRes = "Connexió no acceptada\n\0";
         return -1;
     }
+    TextRes = "Connexió acceptada\n\0";
     //TCP_TrobaAdrSockRem(sck, IPcli, portTCPcli); PETA QUAN DESCOMENTES SEGFAULT mirar TODO
 
     return sck;
