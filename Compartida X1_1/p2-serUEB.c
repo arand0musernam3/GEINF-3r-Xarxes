@@ -82,7 +82,8 @@ int main(int argc,char *argv[])
     escriure(text_res);
 
     while (1) {
-        if ((socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res)) < 0) {
+        socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
+        if (socket_con < 0) {
             escriure(text_res);
             continue;
         }

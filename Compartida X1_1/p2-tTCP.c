@@ -182,11 +182,14 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 
     unsigned int addrlon;
     struct sockaddr_in localaddr;
+    addrlon = sizeof(localaddr);
     getsockname(Sck, (struct sockaddr *)&localaddr, &addrlon);
 
+    newSck = accept(Sck, (struct sockaddr*) &localaddr, &addrlon);
 
-    if ((newSck = accept(Sck, (struct sockaddr*) &localaddr, &addrlon)) == -1) {
+    if (newSck < 0) {
         close(Sck);
+        printf("%d\t%s\n", newSck, strerror(errno));
         return -1;
     }
 
@@ -261,6 +264,7 @@ int TCP_TrobaAdrSockLoc(int Sck, char *IPloc, int *portTCPloc)
 {
     unsigned int addrlon;
     struct sockaddr_in localaddr;
+    addrlon = sizeof(localaddr);
 
     if (getsockname(Sck, (struct sockaddr *)&localaddr, &addrlon) < 0)
         return -1;
@@ -286,6 +290,7 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
 {
     unsigned int addrlon;
     struct sockaddr_in localaddr;
+    addrlon = sizeof(localaddr);
 
     if (getpeername(Sck, (struct sockaddr *)&localaddr, &addrlon) < 0)
         return -1;

@@ -93,11 +93,11 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
 {
     int aux = TCP_AcceptaConnexio(SckEsc, IPcli, portTCPcli);
     if (aux <= 0) {
-        strcpy(TextRes, strerror(aux));
+        strcpy(TextRes, strerror(errno));
         return -1;
     }
     if (TCP_TrobaAdrSockLoc(aux, IPser, portTCPser) < 0) {
-        strcpy(TextRes, strerror(aux));
+        strcpy(TextRes, strerror(errno));
         return -1;
     }
     sprintf(TextRes, "Nova connexió acceptada. Socket: %d\n\0", aux);
@@ -163,7 +163,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     }
     char fitxer[10000];
     int bytes_fitxer = read(descFitx, fitxer, 10000);
-    
+
     ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer);
 
     strcpy(TextRes, "El fitxer ha estat enviat\n\0");
