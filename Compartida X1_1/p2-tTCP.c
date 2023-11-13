@@ -290,7 +290,7 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
 {
     unsigned int addrlon;
     struct sockaddr_in localaddr;
-    addrlon = sizeof(localaddr);
+    addrlon = sizeof(localaddr); /* solució al problema */
 
     if (getpeername(Sck, (struct sockaddr *)&localaddr, &addrlon) < 0)
         return -1;

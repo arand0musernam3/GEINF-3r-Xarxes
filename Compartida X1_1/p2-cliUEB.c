@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <time.h>
+#include <sys/time.h>
 /* Definició de constants, p.e.,                                          */
 
 /* #define XYZ       1500                                                 */
@@ -70,19 +70,19 @@ int main(int argc, char *argv[]) {
             char fitxer[9999];
             int long_fitxer;
 
-            clock_t start, end;
-            start = clock();
+            struct timeval start, end;
+            gettimeofday(&start, 0);
             obtingutCorrectament = UEBc_ObteFitxer(socket_c, nom_fitxer, fitxer, &long_fitxer, text_res);
             if (obtingutCorrectament != 0) {
                 printf("%s", text_res);
             } else {
-                end = clock();
+                gettimeofday(&end, 0);
                 printf("Servida petició: %s %s de %s:%d a %s:%d\n", peticio, nom_fitxer, ip_cli, port_cli, ip_ser,
                        port_ser);
 
                 printf("%s\n", fitxer);
 
-                printf("Temps de resposta: %f ms\n", (((double) (end - start)) / CLOCKS_PER_SEC) * 1000);
+                printf("Temps de resposta: %f s\n", (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)*1e-6);
 
                 int fd = open(nom_fitxer+1, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); //el +1 és per esquivar la / del principi NO TREURE
                 write(fd, fitxer, long_fitxer);
@@ -91,7 +91,9 @@ int main(int argc, char *argv[]) {
         }
         printf("Vols realitzar una altra petició? [y/n]");
         scanf("%s", opt);
-    } while (opt[0] == 'y' || opt[0] == 'Y' || obtingutCorrectament != 0);
+        if (opt[0] == 'n' || opt[0] == 'N')
+            break;
+    } while (opt[0] == 'y' || opt[0] == 'Y' || obtingutCorrectament != 0 );
 
     sleep(5);
 

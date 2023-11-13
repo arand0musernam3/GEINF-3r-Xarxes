@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <time.h>
+#include <sys/time.h>
 
 /* Definició de constants, p.e.,                                          */
 
@@ -233,14 +233,14 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
         sprintf(send_buf + 3, "%.4d", long1);
         memcpy(send_buf + 7, info1, long1);
 
-        clock_t start, end;
-        start = clock();
+        struct timeval start, end;
+        gettimeofday(&start, 0);
         if (TCP_Envia(SckCon, send_buf, long1 + 7) < 0) {
             return -1;
         }
-        end = clock();
+        gettimeofday(&end, 0);
 
-        double te = (((double) (end - start)) / CLOCKS_PER_SEC) * 1000;
+        double te = (end.tv_sec - start.tv_sec)*1000 + (end.tv_usec - start.tv_usec)*1e-3;
         printf("Temps d'enviament: %f ms\n", te);
         printf("Velocitat efectiva: %f b/ms\n", long1 / te);
 
