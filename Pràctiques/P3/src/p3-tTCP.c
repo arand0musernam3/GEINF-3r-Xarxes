@@ -27,6 +27,8 @@
 
 #include <stdio.h>
 
+#define TCP_QUEUE_MAX_SIZE 10
+
 struct sockaddr_in generarStruct(const char *IPloc, int portTCPloc) {
     struct sockaddr_in address;
     address.sin_family = AF_INET;
@@ -109,7 +111,7 @@ int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
     struct sockaddr_in address = generarStruct(IPloc, portTCPloc);
 
     if((scon=socket(AF_INET,SOCK_STREAM,0)) < 0) {
-        printf("%s\n", T_ObteTextRes(&scon));
+        //printf("%s\n", T_ObteTextRes(&scon));
         close(scon);
         return -1;
     }
@@ -117,7 +119,7 @@ int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
     aux = bind(scon, (struct sockaddr*) &address, sizeof(address));
 
     if (aux < 0) {
-        printf("%s\n", T_ObteTextRes(&aux));
+        //printf("%s\n", T_ObteTextRes(&aux));
         close(scon);
         return -1;
     }
@@ -125,7 +127,7 @@ int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
     aux = listen(scon, TCP_QUEUE_MAX_SIZE);
 
     if (aux < 0) {
-        printf("%s\n", T_ObteTextRes(&aux));
+        //printf("%s\n", T_ObteTextRes(&aux));
         close(scon);
         return -1;
     }
@@ -180,16 +182,20 @@ int TCP_AcceptaConnexio(int Sck, char *IPrem, int *portTCPrem)
 
     unsigned int addrlon;
     struct sockaddr_in localaddr;
+    addrlon = sizeof(localaddr);
     getsockname(Sck, (struct sockaddr *)&localaddr, &addrlon);
 
+    newSck = accept(Sck, (struct sockaddr*) &localaddr, &addrlon);
 
-    if ((newSck = accept(Sck, (struct sockaddr*) &localaddr, &addrlon)) == -1) {
+    if (newSck < 0) {
         close(Sck);
+        printf("%d\t%s\n", newSck, strerror(errno));
         return -1;
     }
 
     strcpy(IPrem, inet_ntoa(localaddr.sin_addr));
     *portTCPrem = ntohs(localaddr.sin_port);
+
     return newSck;
 }
 
@@ -258,6 +264,7 @@ int TCP_TrobaAdrSockLoc(int Sck, char *IPloc, int *portTCPloc)
 {
     unsigned int addrlon;
     struct sockaddr_in localaddr;
+    addrlon = sizeof(localaddr);
 
     if (getsockname(Sck, (struct sockaddr *)&localaddr, &addrlon) < 0)
         return -1;
@@ -283,6 +290,7 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
 {
     unsigned int addrlon;
     struct sockaddr_in localaddr;
+    addrlon = sizeof(localaddr); /* solució al problema */
 
     if (getpeername(Sck, (struct sockaddr *)&localaddr, &addrlon) < 0)
         return -1;
@@ -292,4 +300,21 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
     *portTCPrem = ntohs(localaddr.sin_port);
 
     return 0;
+}
+
+/* Examina simultàniament durant "Temps" (en [ms]) els sockets (poden ser */
+/* TCP, UDP i teclat -stdin-) amb identificadors en la llista “LlistaSck” */
+/* (de longitud “LongLlistaSck” sockets) per saber si hi ha arribat       */
+/* alguna cosa per ser llegida. Si Temps és -1, s'espera indefinidament   */
+/* fins que arribi alguna cosa.                                           */
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  l'identificador del socket a través del qual ha arribat alguna cosa;  */
+/*  -1 si hi ha error;                                                    */
+/*  -2 si passa "Temps" sense que arribi res.                             */
+int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int Temps)
+{
+	
 }

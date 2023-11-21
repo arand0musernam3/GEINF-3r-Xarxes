@@ -111,7 +111,7 @@ int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
     struct sockaddr_in address = generarStruct(IPloc, portTCPloc);
 
     if((scon=socket(AF_INET,SOCK_STREAM,0)) < 0) {
-        printf("%s\n", T_ObteTextRes(&scon));
+        //printf("%s\n", T_ObteTextRes(&scon));
         close(scon);
         return -1;
     }
@@ -119,7 +119,7 @@ int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
     aux = bind(scon, (struct sockaddr*) &address, sizeof(address));
 
     if (aux < 0) {
-        printf("%s\n", T_ObteTextRes(&aux));
+        //printf("%s\n", T_ObteTextRes(&aux));
         close(scon);
         return -1;
     }
@@ -127,7 +127,7 @@ int TCP_CreaSockServidor(const char *IPloc, int portTCPloc)
     aux = listen(scon, TCP_QUEUE_MAX_SIZE);
 
     if (aux < 0) {
-        printf("%s\n", T_ObteTextRes(&aux));
+        //printf("%s\n", T_ObteTextRes(&aux));
         close(scon);
         return -1;
     }
