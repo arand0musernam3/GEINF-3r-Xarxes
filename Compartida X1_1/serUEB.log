@@ -1,0 +1,10 @@
+Port d'escolta: 7999
+Arrel de src: /home/xarxes/Desktop/shared/llocUEB
+El servidor ha estat iniciat correctament (Socket d'escolta: 5)
+Nova connexió acceptada. Socket: 6
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/serUEB.log de 10.0.2.4:35754 a 10.0.2.5:7999 pel socket 6
+El fitxer no s'ha trobat
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/primera.html de 10.0.2.4:35754 a 10.0.2.5:7999 pel socket 6
+El fitxer ha estat enviat
+El client ha tancat la connexió
+La connexió s'ha tancat correctament

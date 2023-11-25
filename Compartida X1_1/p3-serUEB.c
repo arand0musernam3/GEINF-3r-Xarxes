@@ -12,19 +12,25 @@
 /*                                                                        */
 /**************************************************************************/
 
-#include "p2-aUEBs.h"
+#include "p3-aUEBs.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "p3-aDNSc.h"
+
+int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck);
+int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck);
+int desferURI(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx);
+
 int read_config(char* path, int* port) {
 
     FILE *fp;
     char linia[50];
 
-    fp = fopen("p2-serUEB.cfg","r");
+    fp = fopen("p3-serUEB.cfg","r");
     if (fgets(linia,sizeof(linia),fp) == NULL) {
         printf("No s'ha pogut trobar el port a obrir");
         return -1;
@@ -110,4 +116,52 @@ int main(int argc,char *argv[])
     }
     
     return 0;
+}
+
+/* Donada la llista d'identificadors de sockets “LlistaSck” (de longitud  */
+/* “LongLlistaSck” sockets), hi busca una posició "lliure" (una amb un    */
+/* contingut igual a -1) i hi escriu l'identificador de socket "Sck".     */
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  0 si tot va bé;                                                       */
+/* -1 si hi ha error.                                                     */
+int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
+{
+	
+}
+
+/* Donada la llista d'identificadors de sockets “LlistaSck” (de longitud  */
+/* “LongLlistaSck” sockets), hi busca la posició on hi ha l'identificador */
+/* de socket "Sck" i la marca com "lliure" (hi escriu un contingut igual  */
+/* a -1).                                                                 */ 
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  0 si tot va bé;                                                       */
+/* -1 si hi ha error.                                                     */
+int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck)
+{
+	
+}
+
+/* Desfà l'URI "uri" en les seves parts: l'esquema (protocol) "esq", el   */
+/* nom DNS (o l'@IP) "nom_host", el número de port "port" i el nom del    */
+/* fitxer "nom_fitxer".                                                   */
+/*                                                                        */
+/* L'URI ha de tenir la forma "esq://nom_host:port/nom_fitxer" o bé       */
+/* sense el número de port "esq://nom_host/nom_fitxer", i llavors port    */
+/* s'emplena amb el valor 0 (la resta de casos no es contemplen).         */
+/*                                                                        */
+/* "uri", "esq", "nom_host" i "nom_fitxer" són "strings" de C (vector de  */
+/* chars imprimibles acabat en '\0') d'una longitud suficient.            */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  el nombre de parts de l'URI que s'han assignat (4 si l'URI tenia      */
+/*  número de port o 3 si no en tenia).                                   */
+int desferURI(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx)
+{
+	
 }
