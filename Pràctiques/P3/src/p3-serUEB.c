@@ -65,7 +65,7 @@ int main(int argc,char *argv[])
     
     // Declaració de variables, p.e., int n;    
     int socket_s;
-    int socket_con;
+    int socket_aux;
     int port_s;
     char text_res[200];
     char buffer[1000];
@@ -95,6 +95,13 @@ int main(int argc,char *argv[])
 
     longLlistaSck = 1 + maxCon; // Socket d'escolta + maxim de connexions
     llistaSck = (int *) malloc(longLlistaSck * sizeof(int));
+
+    if (llistaSck == NULL) {
+        sprintf(buffer, "malloc(), memoria mal assignada\n\0");
+        escriure(buffer);
+        return -1;
+    }
+
     for (int i = 0; i < longLlistaSck; i++)
         llistaSck[i] = -1;
 
@@ -106,9 +113,25 @@ int main(int argc,char *argv[])
     AfegeixSck(socket_s, llistaSck, longLlistaSck);
     escriure(text_res);
 
-    while (UEBs_HaArribatAlgunaCosaPerLlegir(llistaSck, longLlistaSck, text_res) != -1) {
+    while ((socket_aux = UEBs_HaArribatAlgunaCosaPerLlegir(llistaSck, longLlistaSck, text_res)) != -1) {
+        switch (socket_aux) {
+            case socket_s:
 
+                socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
+                
+                escriure(text_res);
+                if (socket_con < 0) continue;
+
+                AfegeixSck(socket_aux, llistaSck, longLlistaSck);
+                
+                break;
+            default:
+
+                break;
+        }
     }
+
+    free(llistaSck);
 
     /*
     while (1) {
