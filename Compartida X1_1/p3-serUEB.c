@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include "p3-aDNSc.h"
 
@@ -70,6 +72,8 @@ int main(int argc,char *argv[])
 
     char path[300];
 
+    fd_set fileDescriptorsArray; int descMax;
+
     // Fitxer log
     fd = open("serUEB.log", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     
@@ -87,16 +91,39 @@ int main(int argc,char *argv[])
 
     escriure(text_res);
 
+    char read0Buffer[512];
+
     while (1) {
-        socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
-        if (socket_con < 0) {
-            escriure(text_res);
-            continue;
+
+        FD_ZERO(&fileDescriptorsArray);
+        FD_SET(0, &fileDescriptorsArray);
+        FD_SET(socket_s, &fileDescriptorsArray);
+
+        descMax = socket_s;
+
+        if (select(descMax+1, &fileDescriptorsArray, NULL, NULL, NULL) == -1) {
+            perror("Error en el select."); exit(-1);
         }
 
-        escriure(text_res);
+        if FD_ISSET(0, &fileDescriptorsArray) {
+            int nBytes = read(0, read0Buffer, 512);
+            //TODO
+        }
 
-        while (1) {
+        else if FD_ISSET(socket_s, &fileDescriptorsArray) {
+            socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
+            if (socket_con < 0) {
+                escriure(text_res);
+                continue;
+            }
+
+
+            escriure(text_res);
+
+            FD_SET(socket_con, &fileDescriptorsArray);
+        }
+        
+        else {
             char tipus[4], nom_fitxer[10000];
             int res = UEBs_ServeixPeticio(socket_con, tipus, nom_fitxer, text_res, path);
 
@@ -113,6 +140,7 @@ int main(int argc,char *argv[])
                 break;
             }
         }
+
     }
     
     return 0;
