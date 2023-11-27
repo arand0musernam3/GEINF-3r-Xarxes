@@ -27,7 +27,7 @@ int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck);
 int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck);
 int desferURI(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx);
 
-int read_config(char* path, int* port) {
+int read_config(char* path, int* port, int* maxCon) {
 
     FILE *fp;
     char linia[50];
@@ -44,6 +44,12 @@ int read_config(char* path, int* port) {
         return -1;
     }
     strcpy(path, linia+7);
+
+    if (fgets(linia,sizeof(linia),fp) == NULL) {
+        printf("No s'ha trobat el limit de connexions simultànies.");
+        return -1;
+    }
+    *maxCon = atoi(linia+11);
 }
 
 int fd;
@@ -60,7 +66,7 @@ int main(int argc,char *argv[])
     
     // Declaració de variables, p.e., int n;    
     int socket_s;
-    int socket_con;
+    int socket_aux;
     int port_s;
     char text_res[200];
     char buffer[1000];
@@ -72,76 +78,87 @@ int main(int argc,char *argv[])
 
     char path[300];
 
-    fd_set fileDescriptorsArray; int descMax;
+    int maxCon;
+    int* fileDescriptorsArray;
+    int longLlistaSck;
 
     // Fitxer log
     fd = open("serUEB.log", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     
-    read_config(path, &port_s);
+    read_config(path, &port_s, &maxCon);
 
     sprintf(buffer, "Port d'escolta: %d\n\0", port_s);
     escriure(buffer);
     sprintf(buffer, "Arrel de src: %s\n\0", path);
     escriure(buffer);
+    sprintf(buffer, "Limit de connexions simultanies: %d\n\0", maxCon);
+    escriure(buffer);
 
+    longLlistaSck = 1 + maxCon; // Socket d'escolta + maxim de connexions
+    llistaSck = (int *) malloc(longLlistaSck * sizeof(int));
+    
+
+    if (llistaSck == NULL) {
+        sprintf(buffer, "malloc(), memoria mal assignada\n\0");
+        escriure(buffer);
+        return -1;
+    }
+
+    for (int i = 0; i < longLlistaSck; i++)
+        llistaSck[i] = -1;
+    
     if (UEBs_IniciaServ(&socket_s, port_s, text_res) == -1) {
         escriure(text_res);
         return -1;
     }
 
     escriure(text_res);
+    AfegeixSck(socket_s, llistaSck, longLlistaSck);
 
-    char read0Buffer[512];
+    while ((socket_aux = UEBs_HaArribatAlgunaCosaPerLlegir(llistaSck, longLlistaSck, text_res)) != -1) {
 
-    while (1) {
+        switch (socket_aux) {
 
-        FD_ZERO(&fileDescriptorsArray);
-        FD_SET(0, &fileDescriptorsArray);
-        FD_SET(socket_s, &fileDescriptorsArray);
+            case socket_s: // Socket d'escolta
 
-        descMax = socket_s;
-
-        if (select(descMax+1, &fileDescriptorsArray, NULL, NULL, NULL) == -1) {
-            perror("Error en el select."); exit(-1);
-        }
-
-        if FD_ISSET(0, &fileDescriptorsArray) {
-            int nBytes = read(0, read0Buffer, 512);
-            //TODO
-        }
-
-        else if FD_ISSET(socket_s, &fileDescriptorsArray) {
-            socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
-            if (socket_con < 0) {
+                socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
+                
                 escriure(text_res);
-                continue;
-            }
+                if (socket_con < 0) continue;
 
+                if (AfegeixSck(socket_aux, llistaSck, longLlistaSck) == -1) {
+                    UEBs_TancaConnexio(socket_con, text_res);
+                    escriure(text_res);
+                }
 
-            escriure(text_res);
-
-            FD_SET(socket_con, &fileDescriptorsArray);
-        }
-        
-        else {
-            char tipus[4], nom_fitxer[10000];
-            int res = UEBs_ServeixPeticio(socket_con, tipus, nom_fitxer, text_res, path);
-
-            if (res == 0 || res == 1) {
-                sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n\0", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
-                escriure(buffer);
-            }
-
-            escriure(text_res);
-
-            if (res == -3) {
-                UEBs_TancaConnexio(socket_con, text_res);
-                escriure(text_res);
                 break;
-            }
+                
+            default: // Socket de connexió
+
+                char tipus[4], nom_fitxer[10000];
+                int res = UEBs_ServeixPeticio(socket_aux, tipus, nom_fitxer, text_res, path);
+
+                if (res == 0 || res == 1) {
+                    sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n\0", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_aux);
+                    escriure(buffer);
+                }
+
+                escriure(text_res);
+
+                if (res == -3) {
+                    TreuSck(socket_aux, llistaSck, longLlistaSck);
+                    UEBs_TancaConnexio(socket_con, text_res);
+                    escriure(text_res);
+                    break;
+                }
+
+                break;
+
         }
 
     }
+
+    free(llistaSck);
     
     return 0;
 }
@@ -157,7 +174,21 @@ int main(int argc,char *argv[])
 /* -1 si hi ha error.                                                     */
 int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
 {
-	
+	int i = 0;
+
+    while (LlistaSck[i] != -1 && i < LongLlistaSck)
+        i++;
+
+    if (i == LongLlistaSck) {
+        char buffer[1000];
+        sprintf(buffer, "No s'ha pogut obrir el socket %d, no queda lloc a la llista\n\0", Sck);
+        escriure(buffer);
+        return -1;
+    }
+
+    LlistaSck[i] = Sck;
+
+    return 0;
 }
 
 /* Donada la llista d'identificadors de sockets “LlistaSck” (de longitud  */
@@ -172,7 +203,21 @@ int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
 /* -1 si hi ha error.                                                     */
 int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck)
 {
-	
+	int i = 0;
+
+    while (LlistaSck[i] != Sck && LongLlistaSck)
+        i++;
+
+    if (i == LongLlistaSck) {
+        char buffer[1000];
+        sprintf(buffer, "No s'ha pogut tancar el socket %d, no existeix a la llista\n\0", Sck);
+        escriure(buffer);
+        return -1;
+    }
+
+    LlistaSck[i] = -1;
+
+	return 0;
 }
 
 /* Desfà l'URI "uri" en les seves parts: l'esquema (protocol) "esq", el   */

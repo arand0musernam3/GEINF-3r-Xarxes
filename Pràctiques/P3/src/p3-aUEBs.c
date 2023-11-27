@@ -309,4 +309,5 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, char *TextRes)
 {
 	
+    
 }

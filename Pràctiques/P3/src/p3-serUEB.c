@@ -122,9 +122,13 @@ int main(int argc,char *argv[])
                 escriure(text_res);
                 if (socket_con < 0) continue;
 
-                AfegeixSck(socket_aux, llistaSck, longLlistaSck);
-                
+                if (AfegeixSck(socket_aux, llistaSck, longLlistaSck) == -1) {
+                    UEBs_TancaConnexio(socket_con, text_res);
+                    escriure(text_res);
+                }
+
                 break;
+                
             default:
 
                 break;

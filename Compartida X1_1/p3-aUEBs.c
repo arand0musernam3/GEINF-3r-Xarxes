@@ -308,5 +308,16 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 /*  -1 si hi ha error.                                                    */
 int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, char *TextRes)
 {
-	
+	int sock = T_HaArribatAlgunaCosaPerLlegir(LlistaSck, LongLlistaSck, -1);
+    switch (sock) {
+        case -1:
+            text_res = "Hi ha hagut un error al select\n\0";
+            break;
+        case -2:
+            text_res = "Timeout al select \n\0";
+            break;
+        default:
+            sprintf(text_res, "Ha arribat alguna cosa per llegir al socket %d\n\0", sock)
+    }
+    return sock;
 }

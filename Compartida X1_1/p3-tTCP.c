@@ -316,5 +316,35 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
 /*  -2 si passa "Temps" sense que arribi res.                             */
 int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int Temps)
 {
-	
+	fd_set conjunt;
+    FD_ZERO(&conjunt);
+    int maxfd = 0;
+
+    for (int i : LlistaSck) {
+        FD_SET(i, &conjunt);
+        if (i > maxfd)
+            maxfd = i;
+    }
+
+    struct timeval tv;
+    if (Temps == -1)
+        tv = NULL;
+    else {
+        tv.tv_sec = 0;
+        tv.tv_usec = Temps/1000;
+    }
+
+    int retval = select(maxfd+1,&conjunt,NULL,NULL,&tv);
+    
+    switch (retval) {
+        case -1:
+            return -1;
+        case 0:
+            return -2;
+        default:
+            for (int i : LlistaSck)
+                if (FD_ISSET(i : &conjunt))
+                    return i;
+    }
+    
 }
