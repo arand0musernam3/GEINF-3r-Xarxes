@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include "p3-aDNSc.h"
 
@@ -44,6 +45,7 @@ int read_config(char* path, int* port, int* maxCon) {
         return -1;
     }
     strcpy(path, linia+7);
+    path[strlen(path)-1] = '\0';
 
     if (fgets(linia,sizeof(linia),fp) == NULL) {
         printf("No s'ha trobat el limit de connexions simultànies.");
@@ -94,7 +96,7 @@ int main(int argc,char *argv[])
     sprintf(buffer, "Limit de connexions simultanies: %d\n", maxCon);
     escriure(buffer);
 
-    longLlistaSck = 1 + maxCon; // Socket d'escolta + maxim de connexions
+    longLlistaSck = 2 + maxCon; // Socket d'escolta + maxim de connexions
     llistaSck = (int *) malloc(longLlistaSck * sizeof(int));
     
 
@@ -115,6 +117,7 @@ int main(int argc,char *argv[])
     escriure(text_res);
     AfegeixSck(socket_s, llistaSck, longLlistaSck);
 
+
     while ((socket_aux = UEBs_HaArribatAlgunaCosaPerLlegir(llistaSck, longLlistaSck, text_res)) != -1) {
 
         escriure(text_res);
@@ -126,7 +129,7 @@ int main(int argc,char *argv[])
             escriure(text_res);
             if (socket_con < 0) continue; // Si alguna capa no l'ha pogu acceptar
 
-            if (AfegeixSck(socket_aux, llistaSck, longLlistaSck) == -1) { // Si l'ha acceptat però no hi ha prou espai a la llista
+            if (AfegeixSck(socket_con, llistaSck, longLlistaSck) == -1) { // Si l'ha acceptat però no hi ha prou espai a la llista
                 UEBs_TancaConnexio(socket_con, text_res); // Opció 1: fer close()
                 escriure(text_res);
             }
@@ -152,7 +155,6 @@ int main(int argc,char *argv[])
             }
 
         }
-
     }
 
     free(llistaSck);

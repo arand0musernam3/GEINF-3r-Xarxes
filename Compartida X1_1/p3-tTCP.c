@@ -322,10 +322,12 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
 
     for (int i = 0; i < LongLlistaSck; i++) {
         int aux = LlistaSck[i];
-        FD_SET(aux, &conjunt);
+        if (aux != -1) FD_SET(aux, &conjunt);
         if (aux > maxfd)
-            aux = i;
+            maxfd = aux;
     }
+
+    //printf("maxFD: %d\nllistaSck[0]:%d\nLongLlistaSck:%d\n", maxfd, LlistaSck[0], LongLlistaSck);
 
     struct timeval tv;
     tv.tv_sec = 0;
@@ -340,8 +342,10 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
             return -2;
         default:
             for (int i = 0; i < LongLlistaSck; i++)
-                if (FD_ISSET(i, &conjunt))
-                    return i;
+                if (LlistaSck[i] != -1 && FD_ISSET(LlistaSck[i], &conjunt)) {
+                    //printf("\t%d\n", LlistaSck[i]);
+                    return LlistaSck[i];
+                }
     }
     
 }

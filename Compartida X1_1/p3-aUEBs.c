@@ -150,10 +150,11 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
         return -4;
     }
 
-    char auxStr[512] = "";
-    strcat(auxStr, path);
+    char auxStr[1024] = "";
+    strcpy(auxStr, path);
     strcat(auxStr, NomFitx);
     strcpy(NomFitx, auxStr);
+    printf("Path complert:%s\n", auxStr);
 
     descFitx = open(NomFitx, O_RDONLY);
     if (descFitx < 0) {

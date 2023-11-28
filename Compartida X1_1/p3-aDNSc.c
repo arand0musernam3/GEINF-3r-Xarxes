@@ -53,7 +53,23 @@
 /* -1 si hi ha un error.                                                  */
 int DNSc_ResolDNSaIP(const char *NomDNS, char *IP, char *TextRes)
 {
+    struct hostent *dadesHOST;
+    struct in_addr adrHOST;
 
+    dadesHOST = gethostbyname(NomDNS);
+    if (dadesHOST == NULL)
+    {
+        sprintf(TextRes, "gethostbyname(): %s", hstrerror(errno));
+        printf("Error: %s\n", TextRes);
+        return -1;
+    }
+
+    adrHOST.s_addr = *((unsigned long *)dadesHOST->h_addr_list[0]);
+    strcpy(IP, (char *)inet_ntoa(adrHOST));
+    sprintf(TextRes, "Tot bé");
+    printf("%s @IP: %s\n\n", TextRes, IP);
+
+    return 0;
 }
 
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */
