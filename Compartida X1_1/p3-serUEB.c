@@ -117,15 +117,17 @@ int main(int argc,char *argv[])
 
     while ((socket_aux = UEBs_HaArribatAlgunaCosaPerLlegir(llistaSck, longLlistaSck, text_res)) != -1) {
 
+        escriure(text_res);
+
         if (socket_aux == socket_s) { // Socket d'escolta
 
             int socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
                 
             escriure(text_res);
-            if (socket_con < 0) continue;
+            if (socket_con < 0) continue; // Si alguna capa no l'ha pogu acceptar
 
-            if (AfegeixSck(socket_aux, llistaSck, longLlistaSck) == -1) {
-                UEBs_TancaConnexio(socket_con, text_res);
+            if (AfegeixSck(socket_aux, llistaSck, longLlistaSck) == -1) { // Si l'ha acceptat però no hi ha prou espai a la llista
+                UEBs_TancaConnexio(socket_con, text_res); // Opció 1: fer close()
                 escriure(text_res);
             }
 
@@ -136,12 +138,12 @@ int main(int argc,char *argv[])
             char tipus[4], nom_fitxer[10000];
             int res = UEBs_ServeixPeticio(socket_aux, tipus, nom_fitxer, text_res, path);
 
+            escriure(text_res);
+
             if (res == 0 || res == 1) {
                 sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_aux);
                 escriure(buffer);
             }
-
-            escriure(text_res);
 
             if (res == -3) {
                 TreuSck(socket_aux, llistaSck, longLlistaSck);
