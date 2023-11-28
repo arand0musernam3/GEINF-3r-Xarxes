@@ -79,7 +79,7 @@ int main(int argc,char *argv[])
     char path[300];
 
     int maxCon;
-    int* fileDescriptorsArray;
+    int* llistaSck;
     int longLlistaSck;
 
     // Fitxer log
@@ -87,11 +87,11 @@ int main(int argc,char *argv[])
     
     read_config(path, &port_s, &maxCon);
 
-    sprintf(buffer, "Port d'escolta: %d\n\0", port_s);
+    sprintf(buffer, "Port d'escolta: %d\n", port_s);
     escriure(buffer);
-    sprintf(buffer, "Arrel de src: %s\n\0", path);
+    sprintf(buffer, "Arrel de src: %s\n", path);
     escriure(buffer);
-    sprintf(buffer, "Limit de connexions simultanies: %d\n\0", maxCon);
+    sprintf(buffer, "Limit de connexions simultanies: %d\n", maxCon);
     escriure(buffer);
 
     longLlistaSck = 1 + maxCon; // Socket d'escolta + maxim de connexions
@@ -99,7 +99,7 @@ int main(int argc,char *argv[])
     
 
     if (llistaSck == NULL) {
-        sprintf(buffer, "malloc(), memoria mal assignada\n\0");
+        sprintf(buffer, "malloc(), memoria mal assignada\n");
         escriure(buffer);
         return -1;
     }
@@ -117,42 +117,37 @@ int main(int argc,char *argv[])
 
     while ((socket_aux = UEBs_HaArribatAlgunaCosaPerLlegir(llistaSck, longLlistaSck, text_res)) != -1) {
 
-        switch (socket_aux) {
+        if (socket_aux == socket_s) { // Socket d'escolta
 
-            case socket_s: // Socket d'escolta
-
-                socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
+            int socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
                 
+            escriure(text_res);
+            if (socket_con < 0) continue;
+
+            if (AfegeixSck(socket_aux, llistaSck, longLlistaSck) == -1) {
+                UEBs_TancaConnexio(socket_con, text_res);
                 escriure(text_res);
-                if (socket_con < 0) continue;
+            }
 
-                if (AfegeixSck(socket_aux, llistaSck, longLlistaSck) == -1) {
-                    UEBs_TancaConnexio(socket_con, text_res);
-                    escriure(text_res);
-                }
+        }
 
-                break;
-                
-            default: // Socket de connexió
+        else { // Socket de connexio
 
-                char tipus[4], nom_fitxer[10000];
-                int res = UEBs_ServeixPeticio(socket_aux, tipus, nom_fitxer, text_res, path);
+            char tipus[4], nom_fitxer[10000];
+            int res = UEBs_ServeixPeticio(socket_aux, tipus, nom_fitxer, text_res, path);
 
-                if (res == 0 || res == 1) {
-                    sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n\0", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_aux);
-                    escriure(buffer);
-                }
+            if (res == 0 || res == 1) {
+                sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_aux);
+                escriure(buffer);
+            }
 
+            escriure(text_res);
+
+            if (res == -3) {
+                TreuSck(socket_aux, llistaSck, longLlistaSck);
+                UEBs_TancaConnexio(socket_aux, text_res);
                 escriure(text_res);
-
-                if (res == -3) {
-                    TreuSck(socket_aux, llistaSck, longLlistaSck);
-                    UEBs_TancaConnexio(socket_con, text_res);
-                    escriure(text_res);
-                    break;
-                }
-
-                break;
+            }
 
         }
 
@@ -181,7 +176,7 @@ int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
 
     if (i == LongLlistaSck) {
         char buffer[1000];
-        sprintf(buffer, "No s'ha pogut obrir el socket %d, no queda lloc a la llista\n\0", Sck);
+        sprintf(buffer, "No s'ha pogut obrir el socket %d, no queda lloc a la llista\n", Sck);
         escriure(buffer);
         return -1;
     }
@@ -210,7 +205,7 @@ int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck)
 
     if (i == LongLlistaSck) {
         char buffer[1000];
-        sprintf(buffer, "No s'ha pogut tancar el socket %d, no existeix a la llista\n\0", Sck);
+        sprintf(buffer, "No s'ha pogut tancar el socket %d, no existeix a la llista\n", Sck);
         escriure(buffer);
         return -1;
     }

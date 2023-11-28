@@ -70,7 +70,7 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
         return -1;
     }
     *SckEsc = aux;
-    sprintf(TextRes, "El servidor ha estat iniciat correctament (Socket d'escolta: %d)\n\0", *SckEsc);
+    sprintf(TextRes, "El servidor ha estat iniciat correctament (Socket d'escolta: %d)\n", *SckEsc);
     return 0;
 }
 
@@ -100,7 +100,7 @@ int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, 
         strcpy(TextRes, strerror(errno));
         return -1;
     }
-    sprintf(TextRes, "Nova connexió acceptada. Socket: %d\n\0", aux);
+    sprintf(TextRes, "Nova connexió acceptada. Socket: %d\n", aux);
     return aux;
 
 }
@@ -311,13 +311,13 @@ int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, c
 	int sock = T_HaArribatAlgunaCosaPerLlegir(LlistaSck, LongLlistaSck, -1);
     switch (sock) {
         case -1:
-            text_res = "Hi ha hagut un error al select\n\0";
+            strcpy(TextRes, "Hi ha hagut un error al select\n\0");
             break;
         case -2:
-            text_res = "Timeout al select \n\0";
+            strcpy(TextRes, "Timeout al select \n\0");
             break;
         default:
-            sprintf(text_res, "Ha arribat alguna cosa per llegir al socket %d\n\0", sock)
+            sprintf(TextRes, "Ha arribat alguna cosa per llegir al socket %d\n", sock);
     }
     return sock;
 }

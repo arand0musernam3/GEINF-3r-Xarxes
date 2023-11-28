@@ -320,21 +320,18 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
     FD_ZERO(&conjunt);
     int maxfd = 0;
 
-    for (int i : LlistaSck) {
-        FD_SET(i, &conjunt);
-        if (i > maxfd)
-            maxfd = i;
+    for (int i = 0; i < LongLlistaSck; i++) {
+        int aux = LlistaSck[i];
+        FD_SET(aux, &conjunt);
+        if (aux > maxfd)
+            aux = i;
     }
 
     struct timeval tv;
-    if (Temps == -1)
-        tv = NULL;
-    else {
-        tv.tv_sec = 0;
-        tv.tv_usec = Temps/1000;
-    }
+    tv.tv_sec = 0;
+    tv.tv_usec = Temps * 1000;
 
-    int retval = select(maxfd+1,&conjunt,NULL,NULL,&tv);
+    int retval = select(maxfd+1,&conjunt,NULL,NULL,Temps == -1 ? NULL : &tv);
     
     switch (retval) {
         case -1:
@@ -342,8 +339,8 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
         case 0:
             return -2;
         default:
-            for (int i : LlistaSck)
-                if (FD_ISSET(i : &conjunt))
+            for (int i = 0; i < LongLlistaSck; i++)
+                if (FD_ISSET(i, &conjunt))
                     return i;
     }
     
