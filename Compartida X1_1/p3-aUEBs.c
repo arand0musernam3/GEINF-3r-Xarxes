@@ -45,6 +45,12 @@ static char receive_buf[MAX_LENGTH];
 
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1);
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
+int is_regular_file(const char *path)
+{
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISREG(path_stat.st_mode);
+}
 
 /* Definició de funcions EXTERNES, és a dir, d'aquelles que es cridaran   */
 /* des d'altres fitxers, p.e., int UEBs_FuncioExterna(arg1, arg2...) { }  */
@@ -154,18 +160,48 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     strcpy(auxStr, path);
     strcat(auxStr, NomFitx);
     strcpy(NomFitx, auxStr);
-    printf("Path complert:%s\n", auxStr);
 
-    descFitx = open(NomFitx, O_RDONLY);
-    if (descFitx < 0) {
-        ConstiEnvMis(SckCon, ERR, "No s'ha trobat el fitxer.\0", 26);
-        strcpy(TextRes, "El fitxer no s'ha trobat\n\0");
-        return 1;
-    }
     char fitxer[10000];
-    int bytes_fitxer = read(descFitx, fitxer, 10000);
+    int bytes_fitxer = 0;
 
-    ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer);
+    if (NomFitx[strlen(NomFitx)-1] == '/') {
+        strcat(NomFitx,"index.html\0");
+        descFitx = open(NomFitx, O_RDONLY);
+        if (descFitx == -1) { // Si no existeix index.html
+            char *cmd = "ls -l";
+            FILE *fp;
+
+            if ((fp = popen(cmd, "r")) == NULL) {
+                strcpy(TextRes, "Error obrint la pipe\n\0");
+                return -4;
+            }
+
+            while (fgets(auxStr, 1024, fp) != NULL) {
+                strcat(fitxer, auxStr);
+                bytes_fitxer += strlen(auxStr);
+            }
+
+            fitxer[bytes_fitxer] = '\0';
+
+            pclose(fp);
+        }
+        else {
+            bytes_fitxer = read(descFitx, fitxer, 10000);
+            fitxer[bytes_fitxer] = '\0';
+        }
+    }
+    else {
+        descFitx = open(NomFitx, O_RDONLY);
+        if (descFitx < 0 || !is_regular_file(NomFitx)) {
+            ConstiEnvMis(SckCon, ERR, "No s'ha trobat el fitxer.\0", 26);
+            strcpy(TextRes, "El fitxer no s'ha trobat\n\0");
+            return 1;
+        }
+        bytes_fitxer = read(descFitx, fitxer, 10000);
+        fitxer[bytes_fitxer] = '\0';
+    }
+
+    ConstiEnvMis(SckCon, COR, fitxer, bytes_fitxer+1); // +1 per enviar fi de linia
 
     strcpy(TextRes, "El fitxer ha estat enviat\n\0");
 

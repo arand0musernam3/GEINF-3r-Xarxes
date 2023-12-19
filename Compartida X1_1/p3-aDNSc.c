@@ -14,6 +14,8 @@
 /* Inclusió de llibreries, p.e. #include <sys/types.h> o #include "meu.h" */
 /*  (si les funcions EXTERNES es cridessin entre elles, faria falta fer   */
 /*   un #include del propi fitxer capçalera)                              */
+#ifndef __USE_MISC
+#define __USE_MISC
 
 #include <string.h>
 #include <stdio.h>
@@ -22,6 +24,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
 
 //* Definició de constants, p.e.,                                         */
 
@@ -90,3 +93,4 @@ int DNSc_ResolDNSaIP(const char *NomDNS, char *IP, char *TextRes)
 	
 } */
 
+#endif

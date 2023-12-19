@@ -14,6 +14,7 @@
 /* Inclusió de llibreries, p.e. #include <stdio.h> o #include "meu.h"     */
 
 #include "p3-aUEBc.h"
+#include "p3-aDNSc.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -178,7 +179,7 @@ int main(int argc, char *argv[])
 
     } while (1);
 
-    //sleep(5);
+    sleep(5);
 
     return 0;
 }

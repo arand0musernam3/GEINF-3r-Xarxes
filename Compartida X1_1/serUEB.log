@@ -1,28 +1,15 @@
 Port d'escolta: 7999
-Arrel de src: /home/xarxes/Desktop/shared/llocUEB
+Arrel de src: /home/xarxes/Desktop/share/llocUEB
 Limit de connexions simultanies: 5
-El servidor ha estat iniciat correctament (Socket d'escolta: 5)
+El servidor ha estat iniciat correctament (Socket d'escolta: 4)
+Ha arribat alguna cosa per llegir al socket 4
+Nova connexió acceptada. Socket: 5
 Ha arribat alguna cosa per llegir al socket 5
-Nova connexió acceptada. Socket: 6
-Ha arribat alguna cosa per llegir al socket 6
-El fitxer ha estat enviat
-Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/primera.html de 10.0.2.4:57227 a 10.0.2.5:7999 pel socket 6
+El fitxer no s'ha trobat
+Petició rebuda: OBT /home/xarxes/Desktop/share/llocUEB/imatges de 10.0.2.15:40621 a 10.0.2.8:7999 pel socket 5
 Ha arribat alguna cosa per llegir al socket 5
-Nova connexió acceptada. Socket: 8
-Ha arribat alguna cosa per llegir al socket 8
-El fitxer ha estat enviat
-Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/segona.html de 10.0.2.4:46376 a 10.0.2.5:7999 pel socket 8
-Ha arribat alguna cosa per llegir al socket 8
 El client ha tancat la connexió
 La connexió s'ha tancat correctament
-Ha arribat alguna cosa per llegir al socket 6
-El client ha tancat la connexió
-La connexió s'ha tancat correctament
-Ha arribat alguna cosa per llegir al socket 5
-Nova connexió acceptada. Socket: 6
-Ha arribat alguna cosa per llegir al socket 6
-El fitxer ha estat enviat
-Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/primera.html de 10.0.2.4:55754 a 10.0.2.5:7999 pel socket 6
-Ha arribat alguna cosa per llegir al socket 6
-El client ha tancat la connexió
+Ha arribat alguna cosa per llegir al socket 0
+Tancant servidor...
 La connexió s'ha tancat correctament

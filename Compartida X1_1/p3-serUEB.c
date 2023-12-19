@@ -52,6 +52,8 @@ int read_config(char* path, int* port, int* maxCon) {
         return -1;
     }
     *maxCon = atoi(linia+11);
+
+    fclose(fp);
 }
 
 int fd;
@@ -115,6 +117,7 @@ int main(int argc,char *argv[])
     }
 
     escriure(text_res);
+    AfegeixSck(0, llistaSck, longLlistaSck);
     AfegeixSck(socket_s, llistaSck, longLlistaSck);
 
 
@@ -132,6 +135,25 @@ int main(int argc,char *argv[])
             if (AfegeixSck(socket_con, llistaSck, longLlistaSck) == -1) { // Si l'ha acceptat però no hi ha prou espai a la llista
                 UEBs_TancaConnexio(socket_con, text_res); // Opció 1: fer close()
                 escriure(text_res);
+            }
+
+        }
+
+        else if (socket_aux == 0) { // Apagar servidor
+
+            int input_l = read(0,buffer,1000);
+            buffer[input_l-1] = '\0';
+
+            if (strcmp(buffer, "STOP") == 0) {
+                sprintf(buffer, "Tancant servidor...\n");
+                escriure(buffer);
+                break;
+            }
+            else {
+                char auxi[200];
+                strcpy(auxi,buffer);
+                sprintf(buffer, "Comanda %s desconeguda. Intenta \"STOP\" per parar\n", auxi);
+                escriure(buffer);
             }
 
         }
@@ -157,7 +179,17 @@ int main(int argc,char *argv[])
         }
     }
 
+    // Tanca connexions
+    for (int i = 0; i < longLlistaSck; i++) {
+        if (llistaSck[i] != 0 && llistaSck[i] != -1) {
+            UEBs_TancaConnexio(llistaSck[i], text_res);
+            escriure(text_res);
+        }
+    }
+
     free(llistaSck);
+
+    close(fd); //Fitxer log
     
     return 0;
 }
@@ -235,5 +267,39 @@ int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck)
 /*  número de port o 3 si no en tenia).                                   */
 int desferURI(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx)
 {
-	
+	int nassignats;
+    char port_str[100];
+
+    strcpy(esq, "");
+    strcpy(nom_host, "");
+    *port = 0;
+    strcpy(nom_fitx, "");
+
+    nassignats = sscanf(uri, "%[^:]://%[^:]:%[^/]%s", esq, nom_host, port_str, nom_fitx);
+
+    /*
+    printf("nassignats %d\n",nassignats);
+    printf("esq %s\n", esq);
+    printf("nom_host %s\n", nom_host);
+    printf("port_str %s\n", port_str);
+    printf("nom_fitx %s\n", nom_fitx);
+    */
+
+    /* URIs amb #port, p.e., esq://host:port/fitx, 4 valors assignats */
+    if (nassignats == 4)
+    {
+        *port = atoi(port_str);
+        return nassignats;
+    }
+
+    /* URIs sense #port, p.e., esq://host/fitx, 2 valors assignats; */
+    /* llavors es fa port = 0 i una nova assignació                 */
+    if (nassignats == 2)
+    {
+        *port = 0;
+        nassignats = sscanf(uri, "%[^:]://%[^/]%s", esq, nom_host, nom_fitx);
+        return nassignats;
+    }
+
+    return nassignats;
 }
