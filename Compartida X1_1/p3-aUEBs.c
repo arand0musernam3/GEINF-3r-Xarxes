@@ -169,7 +169,8 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
         strcat(NomFitx,"index.html\0");
         descFitx = open(NomFitx, O_RDONLY);
         if (descFitx == -1) { // Si no existeix index.html
-            char *cmd = "ls -l";
+            char cmd[512];
+            sprintf(cmd, "ls -l %s", auxStr);
             FILE *fp;
 
             if ((fp = popen(cmd, "r")) == NULL) {
@@ -357,5 +358,5 @@ int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, c
         default:
             sprintf(TextRes, "Ha arribat alguna cosa per llegir al socket %d\n", sock);
     }
-    return sock;
+    return sock < 0 ? -1 : sock;
 }

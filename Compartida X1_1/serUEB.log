@@ -6,24 +6,26 @@ Ha arribat alguna cosa per llegir al socket 4
 Nova connexió acceptada. Socket: 5
 Ha arribat alguna cosa per llegir al socket 5
 El fitxer ha estat enviat
-Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/primera.html de 10.0.2.4:38773 a 10.0.2.5:7999 pel socket 5
-Ha arribat alguna cosa per llegir al socket 4
-Nova connexió acceptada. Socket: 7
-Ha arribat alguna cosa per llegir al socket 7
-El fitxer ha estat enviat
-Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/primera.html de 10.0.2.4:54668 a 10.0.2.5:7999 pel socket 7
-Ha arribat alguna cosa per llegir al socket 4
-Nova connexió acceptada. Socket: 9
-No s'ha pogut obrir el socket 9, no queda lloc a la llista
-La connexió s'ha tancat correctament
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/index.html de 10.0.2.4:56604 a 10.0.2.5:7999 pel socket 5
 Ha arribat alguna cosa per llegir al socket 5
 El client ha tancat la connexió
 La connexió s'ha tancat correctament
-Ha arribat alguna cosa per llegir al socket 7
+Ha arribat alguna cosa per llegir al socket 4
+Nova connexió acceptada. Socket: 5
+Ha arribat alguna cosa per llegir al socket 5
+El fitxer ha estat enviat
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/imatges/index.html de 10.0.2.4:34573 a 10.0.2.5:7999 pel socket 5
+Ha arribat alguna cosa per llegir al socket 5
 El client ha tancat la connexió
 La connexió s'ha tancat correctament
-Ha arribat alguna cosa per llegir al socket 0
-Comanda PARA desconeguda. Intenta "STOP" per parar
+Ha arribat alguna cosa per llegir al socket 4
+Nova connexió acceptada. Socket: 5
+Ha arribat alguna cosa per llegir al socket 5
+El fitxer ha estat enviat
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/../../../index.html de 10.0.2.4:46026 a 10.0.2.5:7999 pel socket 5
+Ha arribat alguna cosa per llegir al socket 5
+El client ha tancat la connexió
+La connexió s'ha tancat correctament
 Ha arribat alguna cosa per llegir al socket 0
 Tancant servidor...
 La connexió s'ha tancat correctament
