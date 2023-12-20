@@ -232,10 +232,7 @@ int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 /* -1 si hi ha error.                                                     */
 int TCP_Rep(int Sck, char *SeqBytes, int LongSeqBytes)
 {
-    int aux;
-    aux = read(Sck, SeqBytes, LongSeqBytes);
-    if (aux < 0)
-        return -1;
+    int aux = read(Sck, SeqBytes, LongSeqBytes);
     return aux;
 }
 
@@ -316,5 +313,33 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
 /*  -2 si passa "Temps" sense que arribi res.                             */
 int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int Temps)
 {
-	
+	fd_set conjunt;
+    FD_ZERO(&conjunt);
+    int maxfd = 0;
+
+    for (int i = 0; i < LongLlistaSck; i++) {
+        int aux = LlistaSck[i];
+        if (aux != -1) FD_SET(aux, &conjunt);
+        if (aux > maxfd)
+            maxfd = aux;
+    }
+
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = Temps * 1000;
+
+    int retval = select(maxfd+1,&conjunt,NULL,NULL,Temps == -1 ? NULL : &tv);
+    
+    switch (retval) {
+        case -1:
+            return -1;
+        case 0:
+            return -2;
+        default:
+            for (int i = 0; i < LongLlistaSck; i++)
+                if (LlistaSck[i] != -1 && FD_ISSET(LlistaSck[i], &conjunt)) {
+                    return LlistaSck[i];
+                }
+    }
+    
 }
