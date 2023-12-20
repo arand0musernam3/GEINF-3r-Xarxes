@@ -1,0 +1,31 @@
+Port d'escolta: 7999
+Arrel de src: /home/xarxes/Desktop/shared/llocUEB
+Limit de connexions simultanies: 2
+El servidor ha estat iniciat correctament (Socket d'escolta: 4)
+Ha arribat alguna cosa per llegir al socket 4
+Nova connexió acceptada. Socket: 5
+Ha arribat alguna cosa per llegir al socket 5
+El fitxer ha estat enviat
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/index.html de 10.0.2.4:56604 a 10.0.2.5:7999 pel socket 5
+Ha arribat alguna cosa per llegir al socket 5
+El client ha tancat la connexió
+La connexió s'ha tancat correctament
+Ha arribat alguna cosa per llegir al socket 4
+Nova connexió acceptada. Socket: 5
+Ha arribat alguna cosa per llegir al socket 5
+El fitxer ha estat enviat
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/imatges/index.html de 10.0.2.4:34573 a 10.0.2.5:7999 pel socket 5
+Ha arribat alguna cosa per llegir al socket 5
+El client ha tancat la connexió
+La connexió s'ha tancat correctament
+Ha arribat alguna cosa per llegir al socket 4
+Nova connexió acceptada. Socket: 5
+Ha arribat alguna cosa per llegir al socket 5
+El fitxer ha estat enviat
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/../../../index.html de 10.0.2.4:46026 a 10.0.2.5:7999 pel socket 5
+Ha arribat alguna cosa per llegir al socket 5
+El client ha tancat la connexió
+La connexió s'ha tancat correctament
+Ha arribat alguna cosa per llegir al socket 0
+Tancant servidor...
+La connexió s'ha tancat correctament
