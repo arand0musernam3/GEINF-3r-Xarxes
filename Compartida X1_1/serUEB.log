@@ -1,15 +1,29 @@
 Port d'escolta: 7999
-Arrel de src: /home/xarxes/Desktop/share/llocUEB
-Limit de connexions simultanies: 5
+Arrel de src: /home/xarxes/Desktop/shared/llocUEB
+Limit de connexions simultanies: 2
 El servidor ha estat iniciat correctament (Socket d'escolta: 4)
 Ha arribat alguna cosa per llegir al socket 4
 Nova connexió acceptada. Socket: 5
 Ha arribat alguna cosa per llegir al socket 5
-El fitxer no s'ha trobat
-Petició rebuda: OBT /home/xarxes/Desktop/share/llocUEB/imatges de 10.0.2.15:40621 a 10.0.2.8:7999 pel socket 5
+El fitxer ha estat enviat
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/primera.html de 10.0.2.4:38773 a 10.0.2.5:7999 pel socket 5
+Ha arribat alguna cosa per llegir al socket 4
+Nova connexió acceptada. Socket: 7
+Ha arribat alguna cosa per llegir al socket 7
+El fitxer ha estat enviat
+Petició rebuda: OBT /home/xarxes/Desktop/shared/llocUEB/primera.html de 10.0.2.4:54668 a 10.0.2.5:7999 pel socket 7
+Ha arribat alguna cosa per llegir al socket 4
+Nova connexió acceptada. Socket: 9
+No s'ha pogut obrir el socket 9, no queda lloc a la llista
+La connexió s'ha tancat correctament
 Ha arribat alguna cosa per llegir al socket 5
 El client ha tancat la connexió
 La connexió s'ha tancat correctament
+Ha arribat alguna cosa per llegir al socket 7
+El client ha tancat la connexió
+La connexió s'ha tancat correctament
+Ha arribat alguna cosa per llegir al socket 0
+Comanda PARA desconeguda. Intenta "STOP" per parar
 Ha arribat alguna cosa per llegir al socket 0
 Tancant servidor...
 La connexió s'ha tancat correctament

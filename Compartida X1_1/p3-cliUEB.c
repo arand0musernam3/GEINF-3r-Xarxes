@@ -166,6 +166,8 @@ int main(int argc, char *argv[])
             int fd = open(nom_fitxer + 1, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); // el +1 és per esquivar la / del principi NO TREURE
             write(fd, fitxer, long_fitxer);
         }
+        
+        sleep(20);
 
         if (UEBc_TancaConnexio(socket_c, text_res) == -1)
         {
@@ -179,7 +181,6 @@ int main(int argc, char *argv[])
 
     } while (1);
 
-    sleep(5);
 
     return 0;
 }

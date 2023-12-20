@@ -162,6 +162,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     strcpy(NomFitx, auxStr);
 
     char fitxer[10000];
+    fitxer[0]='\0';
     int bytes_fitxer = 0;
 
     if (NomFitx[strlen(NomFitx)-1] == '/') {

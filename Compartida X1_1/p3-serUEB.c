@@ -130,7 +130,7 @@ int main(int argc,char *argv[])
             int socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
                 
             escriure(text_res);
-            if (socket_con < 0) continue; // Si alguna capa no l'ha pogu acceptar
+            if (socket_con < 0) continue; // Si alguna capa no l'ha pogut acceptar
 
             if (AfegeixSck(socket_con, llistaSck, longLlistaSck) == -1) { // Si l'ha acceptat però no hi ha prou espai a la llista
                 UEBs_TancaConnexio(socket_con, text_res); // Opció 1: fer close()

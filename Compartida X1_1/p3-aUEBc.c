@@ -85,11 +85,27 @@ int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, 
 {
     int aux;
     aux = ConstiEnvMis(SckCon, "OBT", NomFitx, strlen(NomFitx));
+    if (aux == -1) {
+        strcpy(TextRes, "S'ha produït un error amb la interfície de sockets. Que el servidor està ocupat?\n");
+    }
+    else if (aux == -2) {
+        strcpy(TextRes, "El protocol entrat a la funció UEBc_ObteFitxer és incorrecte.\n");
+    }
     if (aux < 0)
         return aux;
 
     char tipus[4];
     aux = RepiDesconstMis(SckCon, tipus, Fitx, LongFitx);
+    if (aux == -3) {
+        strcpy(TextRes, "La connexió ha estat tancada per part del servidor.\n");
+    }
+    else if (aux == -2) {
+        strcpy(TextRes, "El protocol entrat a la funció UEBc_ObteFitxer és incorrecte.\n");
+    }
+    else if (aux == -1) {
+        strcpy(TextRes, "S'ha produït un error amb la interfície de sockets. Que el servidor està ocupat?\n");
+    }
+
     if (aux < 0)
         return aux;
 

@@ -232,10 +232,7 @@ int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 /* -1 si hi ha error.                                                     */
 int TCP_Rep(int Sck, char *SeqBytes, int LongSeqBytes)
 {
-    int aux;
-    aux = read(Sck, SeqBytes, LongSeqBytes);
-    if (aux < 0)
-        return -1;
+    int aux = read(Sck, SeqBytes, LongSeqBytes);
     return aux;
 }
 
