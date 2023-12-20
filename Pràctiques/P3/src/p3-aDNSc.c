@@ -14,6 +14,8 @@
 /* Inclusió de llibreries, p.e. #include <sys/types.h> o #include "meu.h" */
 /*  (si les funcions EXTERNES es cridessin entre elles, faria falta fer   */
 /*   un #include del propi fitxer capçalera)                              */
+#ifndef __USE_MISC
+#define __USE_MISC
 
 #include <string.h>
 #include <stdio.h>
@@ -22,6 +24,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
 
 //* Definició de constants, p.e.,                                         */
 
@@ -53,7 +56,23 @@
 /* -1 si hi ha un error.                                                  */
 int DNSc_ResolDNSaIP(const char *NomDNS, char *IP, char *TextRes)
 {
+    struct hostent *dadesHOST;
+    struct in_addr adrHOST;
 
+    dadesHOST = gethostbyname(NomDNS);
+    if (dadesHOST == NULL)
+    {
+        sprintf(TextRes, "gethostbyname(): %s", hstrerror(errno));
+        printf("Error: %s\n", TextRes);
+        return -1;
+    }
+
+    adrHOST.s_addr = *((unsigned long *)dadesHOST->h_addr_list[0]);
+    strcpy(IP, (char *)inet_ntoa(adrHOST));
+    sprintf(TextRes, "Tot bé");
+    printf("%s @IP: %s\n\n", TextRes, IP);
+
+    return 0;
 }
 
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */
@@ -74,3 +93,4 @@ int DNSc_ResolDNSaIP(const char *NomDNS, char *IP, char *TextRes)
 	
 } */
 
+#endif

@@ -18,6 +18,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "p3-aDNSc.h"
 
@@ -30,7 +33,7 @@ int read_config(char* path, int* port, int* maxCon) {
     FILE *fp;
     char linia[50];
 
-    fp = fopen("p2-serUEB.cfg","r");
+    fp = fopen("p3-serUEB.cfg","r");
     if (fgets(linia,sizeof(linia),fp) == NULL) {
         printf("No s'ha pogut trobar el port a obrir");
         return -1;
@@ -42,6 +45,7 @@ int read_config(char* path, int* port, int* maxCon) {
         return -1;
     }
     strcpy(path, linia+7);
+    path[strlen(path)-1] = '\0';
 
     if (fgets(linia,sizeof(linia),fp) == NULL) {
         printf("No s'ha trobat el limit de connexions simultànies.");
@@ -49,6 +53,7 @@ int read_config(char* path, int* port, int* maxCon) {
     }
     *maxCon = atoi(linia+11);
 
+    fclose(fp);
 }
 
 int fd;
@@ -70,102 +75,121 @@ int main(int argc,char *argv[])
     char text_res[200];
     char buffer[1000];
 
-    int *llistaSck;
-    int longLlistaSck;
-
     char locIP[16];
     int locPort;
     char remIP[16];
     int remPort;
 
     char path[300];
+
     int maxCon;
+    int* llistaSck;
+    int longLlistaSck;
 
     // Fitxer log
     fd = open("serUEB.log", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     
     read_config(path, &port_s, &maxCon);
 
-    sprintf(buffer, "Port d'escolta: %d\n\0", port_s);
+    sprintf(buffer, "Port d'escolta: %d\n", port_s);
     escriure(buffer);
-    sprintf(buffer, "Arrel de src: %s\n\0", path);
+    sprintf(buffer, "Arrel de src: %s\n", path);
     escriure(buffer);
-    sprintf(buffer, "Limit de connexions simultanies: %d\n\0", maxCon);
+    sprintf(buffer, "Limit de connexions simultanies: %d\n", maxCon);
     escriure(buffer);
 
-    longLlistaSck = 1 + maxCon; // Socket d'escolta + maxim de connexions
+    longLlistaSck = 2 + maxCon; // Socket d'escolta + maxim de connexions
     llistaSck = (int *) malloc(longLlistaSck * sizeof(int));
+    
 
     if (llistaSck == NULL) {
-        sprintf(buffer, "malloc(), memoria mal assignada\n\0");
+        sprintf(buffer, "malloc(), memoria mal assignada\n");
         escriure(buffer);
         return -1;
     }
 
     for (int i = 0; i < longLlistaSck; i++)
         llistaSck[i] = -1;
-
+    
     if (UEBs_IniciaServ(&socket_s, port_s, text_res) == -1) {
         escriure(text_res);
         return -1;
     }
 
-    AfegeixSck(socket_s, llistaSck, longLlistaSck);
     escriure(text_res);
+    AfegeixSck(0, llistaSck, longLlistaSck);
+    AfegeixSck(socket_s, llistaSck, longLlistaSck);
+
 
     while ((socket_aux = UEBs_HaArribatAlgunaCosaPerLlegir(llistaSck, longLlistaSck, text_res)) != -1) {
-        switch (socket_aux) {
-            case socket_s:
 
-                socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
+        escriure(text_res);
+
+        if (socket_aux == socket_s) { // Socket d'escolta
+
+            int socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
                 
+            escriure(text_res);
+            if (socket_con < 0) continue; // Si alguna capa no l'ha pogut acceptar
+
+            if (AfegeixSck(socket_con, llistaSck, longLlistaSck) == -1) { // Si l'ha acceptat però no hi ha prou espai a la llista
+                UEBs_TancaConnexio(socket_con, text_res); // Opció 1: fer close()
                 escriure(text_res);
-                if (socket_con < 0) continue;
+            }
 
-                if (AfegeixSck(socket_aux, llistaSck, longLlistaSck) == -1) {
-                    UEBs_TancaConnexio(socket_con, text_res);
-                    escriure(text_res);
-                }
+        }
 
+        else if (socket_aux == 0) { // Apagar servidor
+
+            int input_l = read(0,buffer,1000);
+            buffer[input_l-1] = '\0';
+
+            if (strcmp(buffer, "STOP") == 0) {
+                sprintf(buffer, "Tancant servidor...\n");
+                escriure(buffer);
                 break;
-                
-            default:
+            }
+            else {
+                char auxi[200];
+                strcpy(auxi,buffer);
+                sprintf(buffer, "Comanda %s desconeguda. Intenta \"STOP\" per parar\n", auxi);
+                escriure(buffer);
+            }
 
-                break;
+        }
+
+        else { // Socket de connexio
+
+            char tipus[4], nom_fitxer[10000];
+            int res = UEBs_ServeixPeticio(socket_aux, tipus, nom_fitxer, text_res, path);
+
+            escriure(text_res);
+
+            if (res == 0 || res == 1) {
+                sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_aux);
+                escriure(buffer);
+            }
+
+            if (res == -3) {
+                TreuSck(socket_aux, llistaSck, longLlistaSck);
+                UEBs_TancaConnexio(socket_aux, text_res);
+                escriure(text_res);
+            }
+
+        }
+    }
+
+    // Tanca connexions
+    for (int i = 0; i < longLlistaSck; i++) {
+        if (llistaSck[i] != 0 && llistaSck[i] != -1) {
+            UEBs_TancaConnexio(llistaSck[i], text_res);
+            escriure(text_res);
         }
     }
 
     free(llistaSck);
 
-    /*
-    while (1) {
-        socket_con = UEBs_AcceptaConnexio(socket_s, locIP, &locPort, remIP, &remPort, text_res);
-        if (socket_con < 0) {
-            escriure(text_res);
-            continue;
-        }
-
-        escriure(text_res);
-
-        while (1) {
-            char tipus[4], nom_fitxer[10000];
-            int res = UEBs_ServeixPeticio(socket_con, tipus, nom_fitxer, text_res, path);
-
-            if (res == 0 || res == 1) {
-                sprintf(buffer, "Petició rebuda: %s %s de %s:%d a %s:%d pel socket %d\n\0", tipus, nom_fitxer, remIP, remPort, locIP, locPort, socket_con);
-                escriure(buffer);
-            }
-
-            escriure(text_res);
-
-            if (res == -3) {
-                UEBs_TancaConnexio(socket_con, text_res);
-                escriure(text_res);
-                break;
-            }
-        }
-    }
-    */
+    close(fd); //Fitxer log
     
     return 0;
 }
@@ -181,14 +205,14 @@ int main(int argc,char *argv[])
 /* -1 si hi ha error.                                                     */
 int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
 {
-    int i = 0;
+	int i = 0;
 
     while (LlistaSck[i] != -1 && i < LongLlistaSck)
         i++;
 
     if (i == LongLlistaSck) {
         char buffer[1000];
-        sprintf(buffer, "No s'ha pogut obrir el socket %d, no queda lloc a la llista\n\0", Sck);
+        sprintf(buffer, "No s'ha pogut obrir el socket %d, no queda lloc a la llista\n", Sck);
         escriure(buffer);
         return -1;
     }
@@ -210,14 +234,14 @@ int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
 /* -1 si hi ha error.                                                     */
 int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck)
 {
-    int i = 0;
+	int i = 0;
 
     while (LlistaSck[i] != Sck && LongLlistaSck)
         i++;
 
     if (i == LongLlistaSck) {
         char buffer[1000];
-        sprintf(buffer, "No s'ha pogut tancar el socket %d, no existeix a la llista\n\0", Sck);
+        sprintf(buffer, "No s'ha pogut tancar el socket %d, no existeix a la llista\n", Sck);
         escriure(buffer);
         return -1;
     }
@@ -243,5 +267,39 @@ int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck)
 /*  número de port o 3 si no en tenia).                                   */
 int desferURI(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx)
 {
-	
+	int nassignats;
+    char port_str[100];
+
+    strcpy(esq, "");
+    strcpy(nom_host, "");
+    *port = 0;
+    strcpy(nom_fitx, "");
+
+    nassignats = sscanf(uri, "%[^:]://%[^:]:%[^/]%s", esq, nom_host, port_str, nom_fitx);
+
+    /*
+    printf("nassignats %d\n",nassignats);
+    printf("esq %s\n", esq);
+    printf("nom_host %s\n", nom_host);
+    printf("port_str %s\n", port_str);
+    printf("nom_fitx %s\n", nom_fitx);
+    */
+
+    /* URIs amb #port, p.e., esq://host:port/fitx, 4 valors assignats */
+    if (nassignats == 4)
+    {
+        *port = atoi(port_str);
+        return nassignats;
+    }
+
+    /* URIs sense #port, p.e., esq://host/fitx, 2 valors assignats; */
+    /* llavors es fa port = 0 i una nova assignació                 */
+    if (nassignats == 2)
+    {
+        *port = 0;
+        nassignats = sscanf(uri, "%[^:]://%[^/]%s", esq, nom_host, nom_fitx);
+        return nassignats;
+    }
+
+    return nassignats;
 }
