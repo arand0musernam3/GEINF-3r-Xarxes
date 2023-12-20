@@ -165,19 +165,20 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     fitxer[0]='\0';
     int bytes_fitxer = 0;
 
-    if (NomFitx[strlen(NomFitx)-1] == '/') {
+    if (NomFitx[strlen(NomFitx)-1] == '/') { // Si és un directori
         strcat(NomFitx,"index.html\0");
         descFitx = open(NomFitx, O_RDONLY);
         if (descFitx == -1) { // Si no existeix index.html
-            char *cmd = "ls -l";
+            char cmd[512];
+            sprintf(cmd, "ls -l %s", auxStr);
             FILE *fp;
 
-            if ((fp = popen(cmd, "r")) == NULL) {
+            if ((fp = popen(cmd, "r")) == NULL) { // Crida al sistema
                 strcpy(TextRes, "Error obrint la pipe\n\0");
                 return -4;
             }
 
-            while (fgets(auxStr, 1024, fp) != NULL) {
+            while (fgets(auxStr, 1024, fp) != NULL) { // Llegeix la crida per la pipe fp
                 strcat(fitxer, auxStr);
                 bytes_fitxer += strlen(auxStr);
             }
@@ -186,12 +187,12 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
 
             pclose(fp);
         }
-        else {
+        else { // Si existeix index.html
             bytes_fitxer = read(descFitx, fitxer, 10000);
             fitxer[bytes_fitxer] = '\0';
         }
     }
-    else {
+    else { // Si és un arxiu qualsevol
         descFitx = open(NomFitx, O_RDONLY);
         if (descFitx < 0 || !is_regular_file(NomFitx)) {
             ConstiEnvMis(SckCon, ERR, "No s'ha trobat el fitxer.\0", 26);
@@ -357,5 +358,5 @@ int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, c
         default:
             sprintf(TextRes, "Ha arribat alguna cosa per llegir al socket %d\n", sock);
     }
-    return sock;
+    return sock < 0 ? -1 : sock;
 }
